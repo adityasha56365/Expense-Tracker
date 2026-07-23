@@ -111,6 +111,18 @@ def load_model():
     return _model
 
 
+def keyword_categorize(text: str) -> Tuple[str, float]:
+    """Lightweight keyword categorization fallback."""
+    text_lower = text.lower()
+    for category, keywords in CATEGORY_KEYWORDS.items():
+        for kw in keywords:
+            if kw.lower() in text_lower:
+                return category, 0.95
+    if any(term in text_lower for term in ["plate", "vada", "pizza", "food", "dine", "restaurant", "cafe"]):
+        return "Food", 0.90
+    return "Other", 0.70
+
+
 def predict_category(text: str) -> Tuple[str, float]:
     """
     Predict transaction category from text.
@@ -127,8 +139,7 @@ def predict_category(text: str) -> Tuple[str, float]:
         idx = np.argmax(proba)
         return str(classes[idx]), float(proba[idx])
     except Exception as e:
-        print(f"ML prediction error: {e}")
-        return "Other", 0.0
+        return keyword_categorize(text)
 
 
 def get_all_predictions(text: str) -> list:
