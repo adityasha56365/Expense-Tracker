@@ -1,0 +1,36 @@
+{
+  "name": "Smart Expense Tracker",
+  "short_name": "Expense AI",
+  "description": "AI-powered personal finance dashboard — track expenses, scan receipts, set budgets",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en-IN",
+  "categories": ["finance", "productivity"],
+  "icons": [
+    {
+      "src": "/icons.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Add Transaction",
+      "short_name": "Add",
+      "url": "/transactions",
+      "icons": [{ "src": "/icons.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Scan Receipt",
+      "short_name": "Scan",
+      "url": "/receipt",
+      "icons": [{ "src": "/icons.svg", "sizes": "any" }]
+    }
+  ],
+  "screenshots": []
+}
