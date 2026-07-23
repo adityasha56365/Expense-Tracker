@@ -7,11 +7,19 @@ Model is trained on startup if no serialized model exists.
 
 import os
 import re
-import joblib
-import numpy as np
 from pathlib import Path
 from typing import Tuple
 from app.utils.constants import CATEGORY_KEYWORDS
+
+joblib = None
+np = None
+try:
+    import joblib as _joblib
+    import numpy as _np
+    joblib = _joblib
+    np = _np
+except Exception:
+    pass
 
 MODEL_PATH = Path(__file__).parent.parent / "models" / "categorizer.joblib"
 MODEL_PATH.parent.mkdir(exist_ok=True)
@@ -99,6 +107,9 @@ def load_model():
     if _model is not None:
         return _model
 
+    if joblib is None:
+        return None
+
     if MODEL_PATH.exists():
         try:
             _model = joblib.load(MODEL_PATH)
@@ -131,15 +142,19 @@ def predict_category(text: str) -> Tuple[str, float]:
     if not text or not text.strip():
         return "Other", 0.0
 
-    try:
-        model = load_model()
-        clean_text = re.sub(r"[^\w\s]", " ", text.lower()).strip()
-        proba = model.predict_proba([clean_text])[0]
-        classes = model.classes_
-        idx = np.argmax(proba)
-        return str(classes[idx]), float(proba[idx])
-    except Exception as e:
-        return keyword_categorize(text)
+    if joblib is not None and np is not None:
+        try:
+            model = load_model()
+            if model is not None:
+                clean_text = re.sub(r"[^\w\s]", " ", text.lower()).strip()
+                proba = model.predict_proba([clean_text])[0]
+                classes = model.classes_
+                idx = np.argmax(proba)
+                return str(classes[idx]), float(proba[idx])
+        except Exception:
+            pass
+
+    return keyword_categorize(text)
 
 
 def get_all_predictions(text: str) -> list:
@@ -147,15 +162,20 @@ def get_all_predictions(text: str) -> list:
     if not text:
         return [{"category": "Other", "confidence": 1.0}]
 
-    try:
-        model = load_model()
-        clean_text = re.sub(r"[^\w\s]", " ", text.lower()).strip()
-        proba = model.predict_proba([clean_text])[0]
-        classes = model.classes_
-        top_indices = np.argsort(proba)[::-1][:3]
-        return [
-            {"category": str(classes[i]), "confidence": round(float(proba[i]), 3)}
-            for i in top_indices
-        ]
-    except Exception:
-        return [{"category": "Other", "confidence": 1.0}]
+    if joblib is not None and np is not None:
+        try:
+            model = load_model()
+            if model is not None:
+                clean_text = re.sub(r"[^\w\s]", " ", text.lower()).strip()
+                proba = model.predict_proba([clean_text])[0]
+                classes = model.classes_
+                top_indices = np.argsort(proba)[::-1][:3]
+                return [
+                    {"category": str(classes[i]), "confidence": round(float(proba[i]), 3)}
+                    for i in top_indices
+                ]
+        except Exception:
+            pass
+
+    cat, conf = keyword_categorize(text)
+    return [{"category": cat, "confidence": conf}]
