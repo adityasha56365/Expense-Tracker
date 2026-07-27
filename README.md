@@ -87,20 +87,12 @@ d:/Expense/
     ```bash
     pip install -r requirements.txt
     ```
-3.  Configure `.env` file (already setup with your MongoDB credentials):
-    ```env
-    MONGODB_URL=mongodb+srv://aditya:Aditya2006@cluster0.ipza7kg.mongodb.net/expense_tracker?retryWrites=true&w=majority&appName=Cluster0&tlsAllowInvalidCertificates=true
-    DATABASE_NAME=expense_tracker
-    SECRET_KEY=smart-expense-tracker-super-secret-key-change-in-production-2024
-    ALGORITHM=HS256
-    ACCESS_TOKEN_EXPIRE_MINUTES=10080
-    CORS_ORIGINS=http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173,http://127.0.0.1:3000
-    ```
-4.  *(Optional)* Seed MongoDB Atlas with initial demo data:
+
+3.  *(Optional)* Seed MongoDB Atlas with initial demo data:
     ```bash
     python -m app.seed.seed_data
     ```
-5.  Start the FastAPI backend:
+4.  Start the FastAPI backend:
     ```bash
     uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
     ```
