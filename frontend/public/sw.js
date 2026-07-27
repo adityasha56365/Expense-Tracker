@@ -1,5 +1,5 @@
-// public/sw.js — Service Worker for PWA offline support
-const CACHE_NAME = 'smart-expense-tracker-v1'
+// public/sw.js — Service Worker for PWA offline support & auto-update
+const CACHE_NAME = 'smart-expense-tracker-v2'
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -7,7 +7,7 @@ const STATIC_ASSETS = [
   '/favicon.svg',
 ]
 
-// ── Install: cache static assets ────────────────────────────────────────────
+// ── Install: cache static assets and skip waiting immediately ─────────
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -19,7 +19,7 @@ self.addEventListener('install', (event) => {
   self.skipWaiting()
 })
 
-// ── Activate: clean up old caches ────────────────────────────────────────────
+// ── Activate: clean up old caches & claim clients immediately ────────
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
@@ -31,7 +31,14 @@ self.addEventListener('activate', (event) => {
   self.clients.claim()
 })
 
-// ── Fetch: Cache-first for static, Network-first for API ─────────────────────
+// ── Listen for skip waiting message ─────────────────────────────────
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting()
+  }
+})
+
+// ── Fetch: Network-First for HTML/Navigation & API, Network-First with Cache Fallback for Assets
 self.addEventListener('fetch', (event) => {
   const { request } = event
   const url = new URL(request.url)
@@ -40,7 +47,7 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return
   if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') return
 
-  // API calls: network-first, fallback to cache
+  // 1. API calls: Network-first, fallback to cache when offline
   if (url.pathname.startsWith('/api/') || url.port === '8000') {
     event.respondWith(
       fetch(request)
@@ -56,26 +63,38 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // Static assets: cache-first for production builds
+  // 2. Navigation / HTML requests: Network-First
+  // Guarantees users always fetch the latest deployed index.html from Vercel!
+  if (request.mode === 'navigate' || url.pathname === '/' || url.pathname.endsWith('.html')) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            const cloned = response.clone()
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, cloned))
+          }
+          return response
+        })
+        .catch(() => caches.match(request).then((cached) => cached || caches.match('/index.html')))
+    )
+    return
+  }
+
+  // 3. Static assets & scripts: Network-first with cache fallback
   event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) return cached
-      return fetch(request).then((response) => {
+    fetch(request)
+      .then((response) => {
         if (response.ok) {
           const cloned = response.clone()
           caches.open(CACHE_NAME).then((cache) => cache.put(request, cloned))
         }
         return response
-      }).catch(() => {
-        if (request.mode === 'navigate') {
-          return caches.match('/index.html')
-        }
       })
-    })
+      .catch(() => caches.match(request))
   )
 })
 
-// ── Background Sync: offline transaction creation ──────────────────────────
+// ── Background Sync: offline transaction creation ───────────────────
 self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-transactions') {
     event.waitUntil(syncPendingTransactions())
@@ -83,11 +102,10 @@ self.addEventListener('sync', (event) => {
 })
 
 async function syncPendingTransactions() {
-  // Placeholder: sync any transactions queued while offline
   console.log('[SW] Background sync triggered')
 }
 
-// ── Push Notifications ────────────────────────────────────────────────────────
+// ── Push Notifications ───────────────────────────────────────────────
 self.addEventListener('push', (event) => {
   const data = event.data?.json() || {}
   const options = {

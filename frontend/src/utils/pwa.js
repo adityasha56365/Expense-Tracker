@@ -29,13 +29,27 @@ export async function registerSW() {
     const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' })
     console.log('[PWA] Service worker registered:', registration.scope)
 
+    // Force update check on page load
+    registration.update()
+
+    // Automatically reload when a new service worker takes control
+    let refreshing = false
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!refreshing) {
+        refreshing = true
+        console.log('[PWA] New version active! Reloading page...')
+        window.location.reload()
+      }
+    })
+
     // Handle updates
     registration.addEventListener('updatefound', () => {
       const newWorker = registration.installing
       if (newWorker) {
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            console.log('[PWA] New version available!')
+            console.log('[PWA] New version available! Activating...')
+            newWorker.postMessage({ type: 'SKIP_WAITING' })
           }
         })
       }
