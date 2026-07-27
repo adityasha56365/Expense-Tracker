@@ -16,6 +16,8 @@ from app.core.database import get_db
 from app.utils.helpers import serialize_list, now_utc
 from app.services.ml_service import predict_category
 
+import re
+
 router = APIRouter(prefix="/import", tags=["Bank Import"])
 
 ALLOWED_TYPES = {
@@ -23,6 +25,7 @@ ALLOWED_TYPES = {
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     "application/vnd.ms-excel",
     "text/plain",
+    "application/pdf",
 }
 MAX_SIZE = 10 * 1024 * 1024  # 10MB
 
@@ -200,8 +203,8 @@ async def preview_import(
     current_user=Depends(get_current_user),
 ):
     """
-    Step 1: Upload file, detect columns, return preview rows.
-    The frontend can adjust column mapping and re-call this endpoint.
+    Step 1: Upload file, detect columns/AI parse PDF, return preview rows.
+    Supports CSV, XLSX, and PDF bank statements.
     """
     content = await file.read()
     if len(content) > MAX_SIZE:
@@ -209,7 +212,48 @@ async def preview_import(
 
     filename = (file.filename or "").lower()
     content_type = (file.content_type or "").lower()
+    uid = str(current_user["_id"])
 
+    # 1. PDF File Parsing
+    if filename.endswith(".pdf") or "pdf" in content_type:
+        text_content = _extract_pdf_text(content)
+        
+        # Try Gemini AI first if configured
+        try:
+            from app.services.gemini_service import is_gemini_configured, parse_bank_statement_with_gemini
+            if is_gemini_configured() and text_content:
+                ai_txs = await parse_bank_statement_with_gemini(text_content, filename)
+                if ai_txs and len(ai_txs) > 0:
+                    for t in ai_txs:
+                        t["user_id"] = uid
+                    headers = ["Date", "Description", "Amount", "Type", "Category"]
+                    auto_map = {"date": "Date", "description": "Description", "amount": "Amount", "type": "Type"}
+                    return {
+                        "headers": headers,
+                        "total_rows": len(ai_txs),
+                        "auto_column_map": auto_map,
+                        "preview": ai_txs,
+                        "sample_raw_rows": ai_txs[:5],
+                    }
+        except Exception as gem_err:
+            print(f"Gemini PDF statement parse error: {gem_err}")
+
+        # Fallback text parsing for PDF
+        headers, rows = _parse_pdf_text_lines(text_content)
+        if not rows:
+            raise HTTPException(status_code=400, detail="Could not extract tabular text from PDF statement. Please try CSV/Excel format.")
+        
+        auto_map = _detect_columns(headers)
+        preview_rows = _rows_to_transactions(rows, auto_map, uid)
+        return {
+            "headers": headers,
+            "total_rows": len(preview_rows),
+            "auto_column_map": auto_map,
+            "preview": preview_rows,
+            "sample_raw_rows": [dict(r) for r in rows[:5]],
+        }
+
+    # 2. Excel & CSV Parsing
     try:
         if filename.endswith(".xlsx") or "openxmlformats" in content_type or "excel" in content_type:
             headers, rows = _parse_xlsx_bytes(content)
@@ -222,9 +266,6 @@ async def preview_import(
         raise HTTPException(status_code=400, detail="No headers found in file")
 
     auto_map = _detect_columns(headers)
-    uid = str(current_user["_id"])
-
-    # Generate preview (first 10 rows parsed)
     preview_rows = _rows_to_transactions(rows[:10], auto_map, uid)
 
     return {

@@ -314,9 +314,19 @@ def extract_line_items(lines: List[str]) -> List[Dict[str, Any]]:
 # ── Main Service Pipeline ─────────────────────────────────────────────────────
 async def process_receipt(image_bytes: bytes, filename: str) -> dict:
     """
-    Main OCR Processing Pipeline using RapidOCR.
+    Main OCR Processing Pipeline.
+    Uses Gemini AI Vision if configured, with RapidOCR / Tesseract fallback.
     Returns structured data: merchant, date, amount, subtotal, tax, items list, confidence.
     """
+    try:
+        from app.services.gemini_service import is_gemini_configured, analyze_receipt_with_gemini
+        if is_gemini_configured():
+            gemini_res = await analyze_receipt_with_gemini(image_bytes, filename)
+            if gemini_res and isinstance(gemini_res, dict) and gemini_res.get("amount"):
+                return gemini_res
+    except Exception as gem_err:
+        print(f"Gemini Vision Receipt OCR notice: {gem_err}")
+
     suffix = Path(filename).suffix.lower() or ".jpg"
 
     with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:

@@ -32,19 +32,20 @@ function StepUpload({ onFile }) {
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
       'application/vnd.ms-excel': ['.xls', '.xlsx'],
       'text/plain': ['.txt', '.csv'],
+      'application/pdf': ['.pdf'],
     },
     maxFiles: 1,
     maxSize: 10 * 1024 * 1024,
   })
 
   const BANKS = [
-    { name: 'HDFC Bank', format: 'CSV' },
-    { name: 'ICICI Bank', format: 'CSV/Excel' },
-    { name: 'SBI', format: 'CSV' },
-    { name: 'Axis Bank', format: 'Excel' },
-    { name: 'Kotak Bank', format: 'CSV' },
-    { name: 'Yes Bank', format: 'CSV' },
-    { name: 'Any other bank', format: 'CSV/Excel' },
+    { name: 'HDFC Bank', format: 'PDF / CSV' },
+    { name: 'ICICI Bank', format: 'PDF / Excel' },
+    { name: 'SBI', format: 'PDF / CSV' },
+    { name: 'Axis Bank', format: 'PDF / Excel' },
+    { name: 'Kotak Bank', format: 'PDF / CSV' },
+    { name: 'Yes Bank', format: 'PDF / CSV' },
+    { name: 'Any other bank', format: 'PDF / CSV / Excel' },
   ]
 
   return (
@@ -66,14 +67,14 @@ function StepUpload({ onFile }) {
           Drag & drop or click to browse
         </p>
         <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
-          CSV or Excel (XLSX) · Max 10MB
+          PDF, CSV or Excel (XLSX) · Max 10MB
         </p>
       </div>
 
       <div className="card p-4">
         <p className="text-xs font-semibold uppercase tracking-wider mb-3"
           style={{ color: 'var(--color-text-tertiary)' }}>
-          Supported Banks
+          Supported Banks & Formats
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {BANKS.map(b => (
@@ -92,8 +93,7 @@ function StepUpload({ onFile }) {
       <div className="card p-4 flex items-start gap-3" style={{ background: 'var(--color-primary-muted)' }}>
         <AlertTriangle size={16} className="flex-shrink-0 mt-0.5" style={{ color: 'var(--color-primary)' }} />
         <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-          Your data stays private and is processed locally. Download your statement from your bank's
-          net banking portal as CSV or Excel format. We detect columns automatically.
+          Your data stays private and secure. Upload statements directly as PDF, CSV or Excel files. Gemini AI automatically parses PDF tables into transaction entries.
         </p>
       </div>
     </div>
@@ -286,7 +286,7 @@ export default function BankImport() {
           Bank Statement Import
         </h2>
         <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
-          Import transactions from your bank statement — CSV or Excel format
+          Import transactions from your bank statement — PDF, CSV or Excel format
         </p>
       </div>
 

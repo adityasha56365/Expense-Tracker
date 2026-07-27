@@ -207,6 +207,18 @@ async def compute_forecast(user_id: str, db, budget_data: dict = None) -> dict:
 
     recommendations = _generate_recommendations(category_monthly, cat_budgets)
 
+    # Try Gemini AI for dynamic insights if configured
+    try:
+        from app.services.gemini_service import is_gemini_configured, generate_ai_insights_with_gemini
+        if is_gemini_configured():
+            ai_data = await generate_ai_insights_with_gemini(monthly_totals, category_monthly, total_budget)
+            if ai_data and isinstance(ai_data, dict) and "recommendations" in ai_data:
+                ai_recs = ai_data.get("recommendations", [])
+                if ai_recs:
+                    recommendations = ai_recs
+    except Exception as gem_err:
+        print(f"Gemini forecast insights notice: {gem_err}")
+
     # Health score (0–100)
     savings_score = min((1 - predicted_spend / max(total_budget, predicted_spend * 1.2)) * 50, 50)
     trend_score = 30 if trend == "stable" else 20 if trend == "decreasing" else 15

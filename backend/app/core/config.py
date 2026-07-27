@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 10080  # 7 days
     CORS_ORIGINS: str = "http://localhost:5173,http://localhost:3000"
     TESSERACT_CMD: str = "tesseract"
+    GEMINI_API_KEY: str = ""
 
     @property
     def cors_origins_list(self) -> list[str]:

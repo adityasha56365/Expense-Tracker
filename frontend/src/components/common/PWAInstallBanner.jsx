@@ -1,75 +1,57 @@
 // src/components/common/PWAInstallBanner.jsx
 import { useState, useEffect } from 'react'
-import { Download, X, Smartphone, Zap, WifiOff, Bell } from 'lucide-react'
+import { Download, X } from 'lucide-react'
 import { initInstallPrompt, showInstallPrompt, isInstalled } from '../../utils/pwa'
 
-const STORAGE_KEY = 'pwa_install_dismissed'
+const STORAGE_KEY  = 'pwa_install_dismissed'
+const BANNER_H     = 48   // px — keep in sync with CSS variable below
 
 export default function PWAInstallBanner() {
-  const [visible, setVisible] = useState(false)
+  const [visible,    setVisible]    = useState(false)
   const [canInstall, setCanInstall] = useState(false)
   const [installing, setInstalling] = useState(false)
-  const [animateOut, setAnimateOut] = useState(false)
+  const [leaving,    setLeaving]    = useState(false)
 
+  /* ── Capture the browser install event ── */
   useEffect(() => {
-    // Don't show if already installed as PWA
     if (isInstalled()) return
-
-    // Don't show if user permanently dismissed
     const dismissed = localStorage.getItem(STORAGE_KEY)
     if (dismissed === 'forever') return
 
-    // Listen for browser install readiness
-    initInstallPrompt((e) => {
-      setCanInstall(true)
-      // Show popup after a brief delay so the page loads first
-      const delay = dismissed === 'session' ? null : 1500
-      if (delay !== null) {
-        const timer = setTimeout(() => setVisible(true), delay)
-        return () => clearTimeout(timer)
-      }
-    })
-
-    // Also show immediately after page ready if event was already fired
-    // (handles some browsers that fire beforeinstallprompt early)
-    const fallbackTimer = setTimeout(() => {
-      if (!localStorage.getItem(STORAGE_KEY)) {
-        // Only show fallback if no dismissed flag and prompt was captured
-        // canInstall check is reactive via state
-      }
-    }, 2000)
-
-    return () => clearTimeout(fallbackTimer)
+    initInstallPrompt(() => setCanInstall(true))
   }, [])
 
-  // Re-show banner when canInstall becomes true (event captured after hook ran)
+  /* ── Show banner once canInstall becomes true ── */
   useEffect(() => {
     if (!canInstall) return
     const dismissed = localStorage.getItem(STORAGE_KEY)
-    if (dismissed === 'forever' || dismissed === 'session') return
-    if (isInstalled()) return
-    const timer = setTimeout(() => setVisible(true), 1500)
-    return () => clearTimeout(timer)
+    if (dismissed === 'forever' || isInstalled()) return
+
+    const t = setTimeout(() => {
+      setVisible(true)
+      // Signal to CSS: banner is active — push sticky headers down
+      document.documentElement.setAttribute('data-pwa-banner', 'true')
+    }, 800)
+    return () => clearTimeout(t)
   }, [canInstall])
 
-  const dismiss = (permanent = false) => {
-    setAnimateOut(true)
+  /* ── Dismiss helpers ── */
+  const hide = (permanent = false) => {
+    setLeaving(true)
+    document.documentElement.removeAttribute('data-pwa-banner')
     setTimeout(() => {
       setVisible(false)
-      setAnimateOut(false)
+      setLeaving(false)
       localStorage.setItem(STORAGE_KEY, permanent ? 'forever' : 'session')
-    }, 350)
+    }, 400)
   }
 
   const handleInstall = async () => {
     setInstalling(true)
     try {
       const outcome = await showInstallPrompt()
-      if (outcome === 'accepted') {
-        dismiss(true)
-      } else {
-        setInstalling(false)
-      }
+      if (outcome === 'accepted') hide(true)
+      else setInstalling(false)
     } catch {
       setInstalling(false)
     }
@@ -79,208 +61,158 @@ export default function PWAInstallBanner() {
 
   return (
     <>
-      {/* Backdrop */}
+      {/* ── Banner strip ── */}
       <div
-        className="pwa-backdrop"
-        onClick={() => dismiss(false)}
+        id="pwa-install-banner"
+        role="banner"
+        aria-label="Install Expense AI"
         style={{
           position: 'fixed',
-          inset: 0,
-          background: 'rgba(0,0,0,0.55)',
-          backdropFilter: 'blur(4px)',
-          zIndex: 9998,
-          animation: animateOut ? 'fadeOut 0.35s ease forwards' : 'fadeIn 0.35s ease forwards',
-        }}
-      />
-
-      {/* Modal */}
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label="Install App"
-        style={{
-          position: 'fixed',
-          bottom: '50%',
-          left: '50%',
-          transform: 'translate(-50%, 50%)',
-          zIndex: 9999,
-          width: 'min(440px, calc(100vw - 32px))',
-          animation: animateOut ? 'slideDown 0.35s ease forwards' : 'slideUp 0.35s ease forwards',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: BANNER_H,
+          zIndex: 10000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 0,
+          padding: '0 16px',
+          background: 'linear-gradient(90deg, #0f766e 0%, #0d9488 55%, #0891b2 100%)',
+          boxShadow: '0 2px 12px rgba(13,148,136,0.40)',
+          animation: leaving
+            ? 'pwaBannerOut 0.38s cubic-bezier(0.4,0,0.2,1) forwards'
+            : 'pwaBannerIn  0.44s cubic-bezier(0.16,1,0.3,1)  forwards',
         }}
       >
-        <div style={{
-          background: 'var(--color-surface-elevated)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 24,
-          boxShadow: '0 32px 64px -12px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.05)',
+        {/* App icon */}
+        <span
+          aria-hidden="true"
+          style={{ fontSize: 18, lineHeight: 1, marginRight: 10, flexShrink: 0 }}
+        >
+          💸
+        </span>
+
+        {/* Copy */}
+        <span style={{
+          color: 'rgba(255,255,255,0.96)',
+          fontSize: '0.8125rem',
+          fontWeight: 500,
+          letterSpacing: '0.01em',
+          whiteSpace: 'nowrap',
           overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          userSelect: 'none',
         }}>
-          {/* Gradient header band */}
-          <div style={{
-            background: 'linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 50%, var(--color-primary-light) 100%)',
-            padding: '28px 28px 20px',
-            position: 'relative',
-          }}>
-            {/* Close button */}
-            <button
-              onClick={() => dismiss(false)}
-              aria-label="Close install prompt"
-              style={{
-                position: 'absolute',
-                top: 16,
-                right: 16,
-                background: 'rgba(255,255,255,0.2)',
-                border: 'none',
-                borderRadius: 10,
-                width: 32,
-                height: 32,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                color: 'white',
-                transition: 'background 0.2s',
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.3)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
-            >
-              <X size={16} />
-            </button>
+          Get the{' '}
+          <strong style={{ fontWeight: 700 }}>Expense AI</strong>{' '}
+          app — faster, offline‑ready, no browser bar
+        </span>
 
-            {/* App icon + name */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <div style={{
-                width: 56,
-                height: 56,
-                borderRadius: 16,
-                background: 'rgba(255,255,255,0.2)',
-                backdropFilter: 'blur(8px)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 28,
-                boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
-              }}>
-                💸
-              </div>
-              <div>
-                <p style={{ color: 'white', fontWeight: 700, fontSize: '1.1rem', margin: 0 }}>
-                  Install Expense AI
-                </p>
-                <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.8rem', marginTop: 2 }}>
-                  Smart Personal Finance Dashboard
-                </p>
-              </div>
-            </div>
-          </div>
+        {/* Install CTA */}
+        <button
+          id="pwa-install-btn"
+          onClick={handleInstall}
+          disabled={installing}
+          aria-label={installing ? 'Installing…' : 'Install Expense AI'}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 5,
+            marginLeft: 14,
+            padding: '5px 13px',
+            borderRadius: 7,
+            background: 'rgba(255,255,255,0.18)',
+            backdropFilter: 'blur(6px)',
+            border: '1px solid rgba(255,255,255,0.38)',
+            color: '#fff',
+            fontSize: '0.775rem',
+            fontWeight: 700,
+            letterSpacing: '0.03em',
+            cursor: installing ? 'not-allowed' : 'pointer',
+            opacity: installing ? 0.65 : 1,
+            transition: 'background 0.16s, transform 0.14s, box-shadow 0.16s',
+            whiteSpace: 'nowrap',
+            flexShrink: 0,
+            fontFamily: 'inherit',
+          }}
+          onMouseEnter={e => {
+            if (installing) return
+            e.currentTarget.style.background = 'rgba(255,255,255,0.30)'
+            e.currentTarget.style.transform  = 'translateY(-1px)'
+            e.currentTarget.style.boxShadow  = '0 4px 12px rgba(0,0,0,0.15)'
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.18)'
+            e.currentTarget.style.transform  = 'translateY(0)'
+            e.currentTarget.style.boxShadow  = 'none'
+          }}
+        >
+          <Download size={12} strokeWidth={2.5} />
+          {installing ? 'Installing…' : 'Install'}
+        </button>
 
-          {/* Body */}
-          <div style={{ padding: '20px 28px 24px' }}>
-            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', marginBottom: 18 }}>
-              Add to your home screen for the best experience — works just like a native app!
-            </p>
+        {/* Separator */}
+        <span style={{
+          width: 1,
+          height: 18,
+          background: 'rgba(255,255,255,0.28)',
+          margin: '0 10px',
+          flexShrink: 0,
+        }} />
 
-            {/* Feature chips */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
-              {[
-                { icon: WifiOff, label: 'Works offline', desc: 'Access your data without internet' },
-                { icon: Zap, label: 'Lightning fast', desc: 'Instant load, no browser overhead' },
-                { icon: Smartphone, label: 'App-like experience', desc: 'Full-screen, no browser bar' },
-                { icon: Bell, label: 'Smart alerts', desc: 'Budget & bill reminders' },
-              ].map(({ icon: Icon, label, desc }) => (
-                <div key={label} style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                  padding: '10px 14px',
-                  borderRadius: 12,
-                  background: 'var(--color-surface-subtle)',
-                }}>
-                  <div style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 10,
-                    background: 'var(--color-primary-muted)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'var(--color-primary)',
-                    flexShrink: 0,
-                  }}>
-                    <Icon size={16} />
-                  </div>
-                  <div>
-                    <p style={{ fontWeight: 600, fontSize: '0.8rem', color: 'var(--color-text-primary)', margin: 0 }}>{label}</p>
-                    <p style={{ fontSize: '0.73rem', color: 'var(--color-text-tertiary)', margin: 0 }}>{desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Action buttons */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <button
-                id="pwa-install-btn"
-                onClick={handleInstall}
-                disabled={installing}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 8,
-                  padding: '13px 24px',
-                  borderRadius: 14,
-                  background: 'linear-gradient(135deg, var(--color-primary-dark), var(--color-primary))',
-                  color: 'white',
-                  border: 'none',
-                  fontWeight: 700,
-                  fontSize: '0.9rem',
-                  cursor: installing ? 'not-allowed' : 'pointer',
-                  opacity: installing ? 0.75 : 1,
-                  transition: 'all 0.2s',
-                  boxShadow: '0 4px 16px rgba(13,148,136,0.4)',
-                }}
-                onMouseEnter={e => { if (!installing) e.currentTarget.style.transform = 'translateY(-1px)' }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)' }}
-              >
-                <Download size={18} />
-                {installing ? 'Installing…' : 'Install App'}
-              </button>
-
-              <button
-                id="pwa-dismiss-btn"
-                onClick={() => dismiss(true)}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'var(--color-text-tertiary)',
-                  fontSize: '0.8rem',
-                  cursor: 'pointer',
-                  padding: '8px',
-                  borderRadius: 8,
-                  transition: 'color 0.2s',
-                }}
-                onMouseEnter={e => e.currentTarget.style.color = 'var(--color-text-secondary)'}
-                onMouseLeave={e => e.currentTarget.style.color = 'var(--color-text-tertiary)'}
-              >
-                No thanks, don&apos;t show again
-              </button>
-            </div>
-          </div>
-        </div>
+        {/* Dismiss (X) */}
+        <button
+          id="pwa-dismiss-btn"
+          onClick={() => hide(false)}
+          aria-label="Dismiss install prompt"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 26,
+            height: 26,
+            borderRadius: 6,
+            background: 'rgba(255,255,255,0.10)',
+            border: '1px solid rgba(255,255,255,0.22)',
+            color: 'rgba(255,255,255,0.80)',
+            cursor: 'pointer',
+            transition: 'background 0.16s, color 0.16s',
+            flexShrink: 0,
+            padding: 0,
+            fontFamily: 'inherit',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.22)'
+            e.currentTarget.style.color = '#fff'
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.10)'
+            e.currentTarget.style.color = 'rgba(255,255,255,0.80)'
+          }}
+        >
+          <X size={13} strokeWidth={2.5} />
+        </button>
       </div>
 
-      {/* Keyframe animations */}
+      {/* ── Keyframes ── */}
       <style>{`
-        @keyframes fadeIn  { from { opacity: 0 } to { opacity: 1 } }
-        @keyframes fadeOut { from { opacity: 1 } to { opacity: 0 } }
-        @keyframes slideUp {
-          from { opacity: 0; transform: translate(-50%, calc(50% + 40px)); }
-          to   { opacity: 1; transform: translate(-50%, 50%); }
+        @keyframes pwaBannerIn {
+          from { transform: translateY(-100%); opacity: 0.6; }
+          to   { transform: translateY(0);     opacity: 1; }
         }
-        @keyframes slideDown {
-          from { opacity: 1; transform: translate(-50%, 50%); }
-          to   { opacity: 0; transform: translate(-50%, calc(50% + 40px)); }
+        @keyframes pwaBannerOut {
+          from { transform: translateY(0);     opacity: 1; }
+          to   { transform: translateY(-100%); opacity: 0; }
+        }
+
+        /* Push sticky topbar + fixed sidebar below the banner */
+        [data-pwa-banner="true"] .sticky {
+          top: ${BANNER_H}px !important;
+        }
+        [data-pwa-banner="true"] .sidebar {
+          top: ${BANNER_H}px !important;
+          min-height: calc(100vh - ${BANNER_H}px) !important;
         }
       `}</style>
     </>
