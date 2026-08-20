@@ -28,8 +28,12 @@
       "dest": "frontend/assets/$1"
     },
     {
-      "src": "/(.*)",
+      "src": "/(favicon.ico|manifest.json|sw.js|robots.txt|pwa-.*|apple-touch-icon.*)",
       "dest": "frontend/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "frontend/index.html"
     }
   ]
 }
