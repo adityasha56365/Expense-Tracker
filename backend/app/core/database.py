@@ -40,4 +40,15 @@ async def close_db():
 
 
 def get_db():
+    global client, db
+    if db is None:
+        client = AsyncIOMotorClient(
+            settings.MONGODB_URL,
+            tls=True,
+            tlsAllowInvalidCertificates=True,
+            serverSelectionTimeoutMS=20000,
+            connectTimeoutMS=20000,
+        )
+        db = client[settings.DATABASE_NAME]
     return db
+

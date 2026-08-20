@@ -3,6 +3,10 @@
   "version": 2,
   "builds": [
     {
+      "src": "api/index.py",
+      "use": "@vercel/python"
+    },
+    {
       "src": "backend/api/index.py",
       "use": "@vercel/python"
     },
@@ -16,12 +20,12 @@
   ],
   "routes": [
     {
-      "src": "/(auth|transactions|budgets|analytics|ocr|forecast|users|goals|recurring|premium|splits|subscriptions|import)(/.*)?",
-      "dest": "backend/api/index.py"
+      "src": "/(auth|transactions|budgets|analytics|ocr|forecast|users|goals|recurring|premium|splits|subscriptions|import|api)(/.*)?",
+      "dest": "/api/index.py"
     },
     {
       "src": "/(health|docs|redoc|openapi.json)(/.*)?",
-      "dest": "backend/api/index.py"
+      "dest": "/api/index.py"
     },
     {
       "src": "/assets/(.*)",
