@@ -36,12 +36,31 @@ async def lifespan(app: FastAPI):
 
 
 
+from fastapi.responses import JSONResponse
+from pymongo.errors import PyMongoError, ServerSelectionTimeoutError
+
 app = FastAPI(
     title="Smart expense tracker API",
     description="Personal Finance Dashboard Backend — FastAPI + MongoDB",
     version="2.0.0",
     lifespan=lifespan,
 )
+
+
+@app.exception_handler(ServerSelectionTimeoutError)
+async def mongo_timeout_handler(request, exc):
+    return JSONResponse(
+        status_code=503,
+        content={"detail": "Database connection timeout. Please add MONGODB_URL in Vercel Environment Variables."}
+    )
+
+
+@app.exception_handler(PyMongoError)
+async def mongo_error_handler(request, exc):
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"Database error: {str(exc)}"}
+    )
 
 
 # ── Middleware to normalize Vercel serverless request paths ───────────────
@@ -57,6 +76,7 @@ async def normalize_vercel_path(request, call_next):
             break
     response = await call_next(request)
     return response
+
 
 
 # ── CORS ───────────────────────────────────────────────────────────────────
