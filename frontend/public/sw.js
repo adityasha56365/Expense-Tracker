@@ -7,6 +7,23 @@ const STATIC_ASSETS = [
   '/favicon.svg',
 ]
 
+const API_PREFIXES = [
+  '/auth',
+  '/transactions',
+  '/budgets',
+  '/analytics',
+  '/ocr',
+  '/forecast',
+  '/users',
+  '/goals',
+  '/recurring',
+  '/premium',
+  '/splits',
+  '/subscriptions',
+  '/import',
+  '/health',
+]
+
 // ── Install: cache static assets and skip waiting immediately ─────────
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -48,7 +65,7 @@ self.addEventListener('fetch', (event) => {
   if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') return
 
   // 1. API calls: Network-first, fallback to cache when offline
-  if (url.pathname.startsWith('/api/') || url.port === '8000') {
+  if (url.pathname.startsWith('/api/') || API_PREFIXES.some((path) => url.pathname.startsWith(path)) || url.port === '8000') {
     event.respondWith(
       fetch(request)
         .then((response) => {

@@ -2,7 +2,7 @@
 import axios from 'axios'
 import toast from 'react-hot-toast'
 
-const API_BASE = import.meta.env.VITE_API_URL || 'https://expense-tracker-seven-plum-74.vercel.app'
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '/api' : '')
 
 const api = axios.create({
   baseURL: API_BASE,

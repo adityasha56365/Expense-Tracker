@@ -42,29 +42,30 @@ export function AuthProvider({ children }) {
     loadUser()
   }, [loadUser])
 
-  const login = async (credentials) => {
-    try {
-      const { data } = await authApi.login(credentials)
-      localStorage.setItem('smart_expense_tracker_token', data.access_token)
-      setUser(data.user)
-      setIsAuthenticated(true)
-      toast.success(`Welcome back, ${data.user.name}!`)
-      return data
-    } catch (error) {
-      if (credentials.email === 'demo@smartexpensetracker.in' && credentials.password === 'demo1234') {
-        localStorage.setItem('smart_expense_tracker_token', 'demo_mock_token')
-        const mockUser = {
-          name: 'Demo User',
-          email: 'demo@smartexpensetracker.in',
-          preferences: { theme: 'light', currency: 'INR' }
-        }
-        setUser(mockUser)
-        setIsAuthenticated(true)
-        toast.success('Welcome! Running in offline demo mode.', { icon: '💡' })
-        return { user: mockUser, access_token: 'demo_mock_token' }
-      }
-      throw error
+  const startDemoSession = () => {
+    localStorage.setItem('smart_expense_tracker_token', 'demo_mock_token')
+    const mockUser = {
+      name: 'Demo User',
+      email: 'demo@smartexpensetracker.in',
+      preferences: { theme: 'light', currency: 'INR' }
     }
+    setUser(mockUser)
+    setIsAuthenticated(true)
+    toast.success('Welcome! Running in offline demo mode.', { icon: '💡' })
+    return { user: mockUser, access_token: 'demo_mock_token' }
+  }
+
+  const login = async (credentials) => {
+    if (credentials.email === 'demo@smartexpensetracker.in' && credentials.password === 'demo1234') {
+      return startDemoSession()
+    }
+
+    const { data } = await authApi.login(credentials)
+    localStorage.setItem('smart_expense_tracker_token', data.access_token)
+    setUser(data.user)
+    setIsAuthenticated(true)
+    toast.success(`Welcome back, ${data.user.name}!`)
+    return data
   }
 
   const register = async (userData) => {
