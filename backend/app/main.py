@@ -43,14 +43,31 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+
+# ── Middleware to normalize Vercel serverless request paths ───────────────
+@app.middleware("http")
+async def normalize_vercel_path(request, call_next):
+    path = request.url.path
+    for prefix in ("/api/index.py", "/backend/api/index.py", "/api/index"):
+        if path.startswith(prefix):
+            new_path = path[len(prefix):]
+            if not new_path:
+                new_path = "/"
+            request.scope["path"] = new_path
+            break
+    response = await call_next(request)
+    return response
+
+
 # ── CORS ───────────────────────────────────────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,
-    allow_credentials=True,
+    allow_credentials=True if settings.cors_origins_list != ["*"] else False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # ── Routers ────────────────────────────────────────────────────────────────
 app.include_router(auth.router)
