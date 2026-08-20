@@ -19,15 +19,21 @@ settings = get_settings()
 async def lifespan(app: FastAPI):
     """Startup and shutdown events."""
     print("Starting Smart expense tracker API...")
-    await connect_db()
-    # Pre-load ML model on startup
+    try:
+        await connect_db()
+    except Exception as e:
+        print(f"Database connection warning on startup: {e}")
     try:
         load_model()
     except Exception as e:
         print(f"ML model load warning: {e}")
     yield
     print("Shutting down Smart expense tracker API...")
-    await close_db()
+    try:
+        await close_db()
+    except Exception as e:
+        print(f"Database close warning: {e}")
+
 
 
 app = FastAPI(

@@ -102,7 +102,7 @@ def train_model():
 
 
 def load_model():
-    """Load model from disk, train if not found."""
+    """Load model from disk safely."""
     global _model
     if _model is not None:
         return _model
@@ -110,16 +110,20 @@ def load_model():
     if joblib is None:
         return None
 
-    if MODEL_PATH.exists():
-        try:
-            _model = joblib.load(MODEL_PATH)
-            print(f"ML model loaded from {MODEL_PATH}")
-        except Exception:
-            _model = train_model()
-    else:
-        _model = train_model()
+    try:
+        if MODEL_PATH.exists():
+            try:
+                _model = joblib.load(MODEL_PATH)
+                print(f"ML model loaded from {MODEL_PATH}")
+            except Exception as e:
+                print(f"joblib load skipped: {e}")
+                _model = None
+    except Exception as e:
+        print(f"load_model error ignored: {e}")
+        _model = None
 
     return _model
+
 
 
 def keyword_categorize(text: str) -> Tuple[str, float]:
