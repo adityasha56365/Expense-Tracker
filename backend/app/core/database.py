@@ -10,25 +10,20 @@ db = None
 
 async def connect_db():
     global client, db
-    client = AsyncIOMotorClient(
-        settings.MONGODB_URL,
-        tls=True,
-        tlsAllowInvalidCertificates=True,
-        serverSelectionTimeoutMS=20000,
-        connectTimeoutMS=20000,
-    )
-    db = client[settings.DATABASE_NAME]
-    # Create indexes
-    await db.users.create_index("email", unique=True)
-    await db.transactions.create_index("user_id")
-    await db.transactions.create_index([("user_id", 1), ("date", -1)])
-    await db.transactions.create_index([("user_id", 1), ("category", 1)])
-    await db.budgets.create_index([("user_id", 1), ("month", 1), ("year", 1)])
-    await db.receipts.create_index("user_id")
-    await db.goals.create_index("user_id")
-    await db.splits.create_index("user_id")
-    await db.subscriptions.create_index("user_id")
-    await db.recurring_patterns.create_index("user_id")
+    if client is None:
+        client = AsyncIOMotorClient(
+            settings.MONGODB_URL,
+            tls=True,
+            tlsAllowInvalidCertificates=True,
+            serverSelectionTimeoutMS=5000,
+            connectTimeoutMS=5000,
+        )
+        db = client[settings.DATABASE_NAME]
+    try:
+        await db.users.create_index("email", unique=True)
+        await db.transactions.create_index("user_id")
+    except Exception as e:
+        print(f"Index creation notice: {e}")
     print("Connected to MongoDB Atlas")
 
 
@@ -46,9 +41,8 @@ def get_db():
             settings.MONGODB_URL,
             tls=True,
             tlsAllowInvalidCertificates=True,
-            serverSelectionTimeoutMS=20000,
-            connectTimeoutMS=20000,
+            serverSelectionTimeoutMS=5000,
+            connectTimeoutMS=5000,
         )
         db = client[settings.DATABASE_NAME]
     return db
-
