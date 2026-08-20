@@ -1,83 +1,31 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "cd frontend && npm install && npm run build",
-  "outputDirectory": "frontend/dist",
-  "rewrites": [
+  "version": 2,
+  "builds": [
     {
-      "source": "/auth/:path*",
-      "destination": "/api/index.py"
+      "src": "api/index.py",
+      "use": "@vercel/python"
     },
     {
-      "source": "/transactions/:path*",
-      "destination": "/api/index.py"
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(auth|transactions|budgets|analytics|ocr|forecast|users|goals|recurring|premium|splits|subscriptions|import|health|docs|redoc|openapi.json)(/.*)?",
+      "dest": "api/index.py"
     },
     {
-      "source": "/budgets/:path*",
-      "destination": "/api/index.py"
+      "src": "/assets/(.*)",
+      "dest": "frontend/assets/$1"
     },
     {
-      "source": "/analytics/:path*",
-      "destination": "/api/index.py"
-    },
-    {
-      "source": "/ocr/:path*",
-      "destination": "/api/index.py"
-    },
-    {
-      "source": "/forecast/:path*",
-      "destination": "/api/index.py"
-    },
-    {
-      "source": "/users/:path*",
-      "destination": "/api/index.py"
-    },
-    {
-      "source": "/goals/:path*",
-      "destination": "/api/index.py"
-    },
-    {
-      "source": "/recurring/:path*",
-      "destination": "/api/index.py"
-    },
-    {
-      "source": "/premium/:path*",
-      "destination": "/api/index.py"
-    },
-    {
-      "source": "/splits/:path*",
-      "destination": "/api/index.py"
-    },
-    {
-      "source": "/subscriptions/:path*",
-      "destination": "/api/index.py"
-    },
-    {
-      "source": "/import/:path*",
-      "destination": "/api/index.py"
-    },
-    {
-      "source": "/health",
-      "destination": "/api/index.py"
-    },
-    {
-      "source": "/docs",
-      "destination": "/api/index.py"
-    },
-    {
-      "source": "/redoc",
-      "destination": "/api/index.py"
-    },
-    {
-      "source": "/openapi.json",
-      "destination": "/api/index.py"
-    },
-    {
-      "source": "/api/:path*",
-      "destination": "/api/index.py"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "/(.*)",
+      "dest": "frontend/$1"
     }
   ]
 }
