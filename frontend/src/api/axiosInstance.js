@@ -2,23 +2,7 @@
 import axios from 'axios'
 import toast from 'react-hot-toast'
 
-let API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '/api' : '')
-
-// Fallback safety check: If VITE_API_URL points to a different vercel.app domain than current browser host,
-// default to relative URL so requests hit the current active deployment!
-if (typeof window !== 'undefined' && window.location) {
-  const currentHost = window.location.hostname
-  if (API_BASE && API_BASE.includes('vercel.app')) {
-    try {
-      const urlHost = new URL(API_BASE).hostname
-      if (urlHost !== currentHost) {
-        API_BASE = ''
-      }
-    } catch (e) {
-      API_BASE = ''
-    }
-  }
-}
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '/api' : '')
 
 const api = axios.create({
   baseURL: API_BASE,
