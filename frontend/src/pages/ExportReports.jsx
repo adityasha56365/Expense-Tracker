@@ -1,8 +1,4 @@
 // src/pages/ExportReports.jsx
-/**
- * Export Reports — PDF, CSV, Excel
- * Charts are included in PDF via html2canvas.
- */
 import { useState, useRef } from 'react'
 import { useApp } from '../context/AppContext'
 import { Download, FileText, FileSpreadsheet, Calendar, Filter } from 'lucide-react'
@@ -20,9 +16,9 @@ const REPORT_TYPES = [
 
 function StatBox({ label, value, color }) {
   return (
-    <div className="p-4 rounded-xl" style={{ background: 'var(--color-surface-subtle)' }}>
-      <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>{label}</p>
-      <p className="text-lg font-bold mt-1" style={{ color: color || 'var(--color-text-primary)' }}>{value}</p>
+    <div className="p-4 rounded-xl min-w-0" style={{ background: 'var(--color-surface-subtle)' }}>
+      <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>{label}</p>
+      <p className="text-base sm:text-lg font-bold mt-1 truncate" style={{ color: color || 'var(--color-text-primary)' }}>{value}</p>
     </div>
   )
 }
@@ -50,7 +46,6 @@ export default function ExportReports() {
         return date.getFullYear() === year
       }
       if (reportType === 'tax') {
-        // Indian financial year: April to March
         const fyStart = new Date(`${year}-04-01`)
         const fyEnd = new Date(`${year + 1}-03-31`)
         return date >= fyStart && date <= fyEnd
@@ -182,7 +177,7 @@ export default function ExportReports() {
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in max-w-full overflow-hidden">
       <div>
         <h2 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Export Reports</h2>
         <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
@@ -191,7 +186,7 @@ export default function ExportReports() {
       </div>
 
       {/* Controls */}
-      <div className="card p-5 space-y-4">
+      <div className="card p-4 sm:p-5 space-y-4">
         {/* Report type */}
         <div>
           <label className="text-sm font-medium mb-2 block" style={{ color: 'var(--color-text-secondary)' }}>
@@ -200,7 +195,7 @@ export default function ExportReports() {
           <div className="flex flex-wrap gap-2">
             {REPORT_TYPES.map(r => (
               <button key={r.key} onClick={() => setReportType(r.key)}
-                className="px-3 py-1.5 rounded-lg text-sm border transition-all"
+                className="px-3 py-1.5 rounded-lg text-xs sm:text-sm border transition-all"
                 style={{
                   borderColor: reportType === r.key ? 'var(--color-primary)' : 'var(--color-border)',
                   background: reportType === r.key ? 'var(--color-primary-muted)' : 'var(--color-surface-subtle)',
@@ -215,25 +210,25 @@ export default function ExportReports() {
 
         {/* Period controls */}
         {(reportType === 'monthly' || reportType === 'yearly' || reportType === 'tax') && (
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             {reportType === 'monthly' && (
               <div className="flex flex-col gap-1">
                 <label className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>Month</label>
-                <select className="form-input w-32" value={month} onChange={e => setMonth(Number(e.target.value))}>
+                <select className="form-input w-28 sm:w-32" value={month} onChange={e => setMonth(Number(e.target.value))}>
                   {MONTHS.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
                 </select>
               </div>
             )}
             <div className="flex flex-col gap-1">
               <label className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>Year</label>
-              <input className="form-input w-28" type="number" value={year}
+              <input className="form-input w-24 sm:w-28" type="number" value={year}
                 onChange={e => setYear(Number(e.target.value))} min="2020" max="2030" />
             </div>
           </div>
         )}
 
         {reportType === 'custom' && (
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex flex-col gap-1">
               <label className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>From</label>
               <input className="form-input" type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} />
@@ -246,7 +241,7 @@ export default function ExportReports() {
         )}
 
         {/* Export buttons */}
-        <div className="flex flex-wrap gap-3 pt-2 border-t" style={{ borderColor: 'var(--color-border)' }}>
+        <div className="flex flex-wrap gap-2 sm:gap-3 pt-2 border-t" style={{ borderColor: 'var(--color-border)' }}>
           <Button variant="secondary" size="sm" icon={Download}
             loading={exporting === 'csv'} onClick={exportCSV}>
             Export CSV
@@ -262,15 +257,15 @@ export default function ExportReports() {
         </div>
       </div>
 
-      {/* Report Preview (this is what gets captured for PDF) */}
-      <div ref={reportRef} className="card p-6 space-y-5"
+      {/* Report Preview */}
+      <div ref={reportRef} className="card p-4 sm:p-6 space-y-5"
         style={{ background: 'var(--color-surface)', color: 'var(--color-text-primary)' }}>
         {/* Report header */}
         <div className="border-b pb-4" style={{ borderColor: 'var(--color-border)' }}>
-          <h3 className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
+          <h3 className="text-base sm:text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
             {REPORT_TYPES.find(r => r.key === reportType)?.label}
           </h3>
-          <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
+          <p className="text-xs sm:text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
             {reportType === 'monthly' ? `${MONTHS[month - 1]} ${year}` :
              reportType === 'yearly' ? `Year ${year}` :
              reportType === 'tax' ? `FY ${year}–${year + 1}` :
@@ -280,7 +275,7 @@ export default function ExportReports() {
         </div>
 
         {/* Summary grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <StatBox label="Total Income" value={formatCurrency(totalIncome, currency)} color="var(--color-success)" />
           <StatBox label="Total Expense" value={formatCurrency(totalExpense, currency)} color="var(--color-danger)" />
           <StatBox label="Net Savings" value={formatCurrency(savings, currency)} color="var(--color-primary)" />
@@ -299,11 +294,11 @@ export default function ExportReports() {
                 return (
                   <div key={cat}>
                     <div className="flex items-center justify-between text-sm mb-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
                         <span>{catInfo?.icon}</span>
-                        <span style={{ color: 'var(--color-text-primary)' }}>{cat}</span>
+                        <span className="truncate" style={{ color: 'var(--color-text-primary)' }}>{cat}</span>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                         <span style={{ color: 'var(--color-text-tertiary)' }}>{pct.toFixed(1)}%</span>
                         <span className="font-semibold tabular-nums" style={{ color: 'var(--color-text-primary)' }}>
                           {formatCurrency(amt, currency)}
@@ -326,7 +321,7 @@ export default function ExportReports() {
             style={{ color: 'var(--color-text-tertiary)' }}>
             Transactions ({filteredTxs.length})
           </p>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto w-full">
             <table className="w-full text-xs">
               <thead>
                 <tr style={{ background: 'var(--color-surface-subtle)' }}>
@@ -339,13 +334,13 @@ export default function ExportReports() {
               <tbody>
                 {filteredTxs.slice(0, 50).map((t, i) => (
                   <tr key={t._id || i} className="border-t" style={{ borderColor: 'var(--color-border-subtle)' }}>
-                    <td className="px-3 py-2" style={{ color: 'var(--color-text-secondary)' }}>{formatDate(t.date)}</td>
+                    <td className="px-3 py-2 whitespace-nowrap" style={{ color: 'var(--color-text-secondary)' }}>{formatDate(t.date)}</td>
                     <td className="px-3 py-2 max-w-xs truncate" style={{ color: 'var(--color-text-primary)' }}>{t.title}</td>
-                    <td className="px-3 py-2" style={{ color: 'var(--color-text-secondary)' }}>{t.category}</td>
-                    <td className="px-3 py-2">
+                    <td className="px-3 py-2 whitespace-nowrap" style={{ color: 'var(--color-text-secondary)' }}>{t.category}</td>
+                    <td className="px-3 py-2 whitespace-nowrap">
                       <span className={`badge ${t.type === 'income' ? 'badge-income' : 'badge-expense'}`}>{t.type}</span>
                     </td>
-                    <td className="px-3 py-2 tabular-nums font-medium"
+                    <td className="px-3 py-2 tabular-nums font-medium whitespace-nowrap"
                       style={{ color: t.type === 'income' ? 'var(--color-success)' : 'var(--color-danger)' }}>
                       {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount, currency)}
                     </td>

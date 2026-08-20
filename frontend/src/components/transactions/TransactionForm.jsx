@@ -131,7 +131,7 @@ export default function TransactionForm({ isOpen, onClose, onSubmit, initialData
           error={errors.title}
         />
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Input
             label="Amount (₹)"
             type="number"
@@ -151,7 +151,7 @@ export default function TransactionForm({ isOpen, onClose, onSubmit, initialData
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Select
             label="Category"
             value={form.category}

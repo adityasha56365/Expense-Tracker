@@ -78,7 +78,7 @@ function SubFormModal({ isOpen, onClose, onSubmit, initialData }) {
             </button>
           ))}
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           {SUB_COLORS.map(c => (
             <button key={c} type="button" onClick={() => setForm(f => ({ ...f, color: c }))}
               className="w-6 h-6 rounded-full border-2 transition-all"
@@ -86,14 +86,14 @@ function SubFormModal({ isOpen, onClose, onSubmit, initialData }) {
           ))}
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Input label="Service Name" placeholder="Netflix" required
             value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
           <Input label="Amount (₹)" type="number" required
             value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="text-sm font-medium mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>
               Billing Cycle
@@ -180,7 +180,7 @@ function SubCard({ sub, onToggle, onEdit, onDelete, onViewInvoice }) {
           {sub.icon || '📱'}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <p className="text-sm font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
               {sub.name}
             </p>
@@ -191,7 +191,7 @@ function SubCard({ sub, onToggle, onEdit, onDelete, onViewInvoice }) {
               </span>
             )}
           </div>
-          <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+          <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>
             {sub.billing_cycle} · {sub.category}
             {sub.days_until_billing !== null && ` · ${sub.days_until_billing}d away`}
           </p>
@@ -208,24 +208,24 @@ function SubCard({ sub, onToggle, onEdit, onDelete, onViewInvoice }) {
 
       <div className="flex items-center gap-2 mt-3 pt-3 border-t"
         style={{ borderColor: 'var(--color-border-subtle)' }}>
-        <div className="flex items-center gap-1 text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-          <Calendar size={11} />
-          <span>{sub.next_billing_date}</span>
+        <div className="flex items-center gap-1 text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>
+          <Calendar size={11} className="flex-shrink-0" />
+          <span className="truncate">{sub.next_billing_date}</span>
         </div>
-        <div className="flex-1" />
+        <div className="flex-1 min-w-0" />
         <button onClick={() => onViewInvoice(sub._id)}
-          className="btn btn-ghost btn-sm !p-1.5 rounded-lg" title="View Invoice">
+          className="btn btn-ghost btn-sm !p-1.5 rounded-lg" title="View Invoice" aria-label="View invoice">
           <FileText size={13} />
         </button>
-        <button onClick={() => onEdit(sub)} className="btn btn-ghost btn-sm !p-1.5 rounded-lg" title="Edit">
+        <button onClick={() => onEdit(sub)} className="btn btn-ghost btn-sm !p-1.5 rounded-lg" title="Edit" aria-label="Edit">
           <Edit2 size={13} />
         </button>
         <button onClick={() => onToggle(sub._id, !sub.is_active)}
-          className="btn btn-ghost btn-sm !p-1.5 rounded-lg" title={sub.is_active ? 'Pause' : 'Activate'}>
+          className="btn btn-ghost btn-sm !p-1.5 rounded-lg" title={sub.is_active ? 'Pause' : 'Activate'} aria-label="Toggle active">
           {sub.is_active ? <ToggleRight size={16} style={{ color: 'var(--color-success)' }} /> : <ToggleLeft size={16} style={{ color: 'var(--color-text-tertiary)' }} />}
         </button>
         <button onClick={() => onDelete(sub._id)}
-          className="btn btn-ghost btn-sm !p-1.5 rounded-lg hover:!text-red-500" title="Delete">
+          className="btn btn-ghost btn-sm !p-1.5 rounded-lg hover:!text-red-500" title="Delete" aria-label="Delete">
           <Trash2 size={13} />
         </button>
       </div>
@@ -322,8 +322,8 @@ export default function Subscriptions() {
   const dueSoon = subs.filter(s => s.is_due_soon && s.is_active)
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 animate-fade-in max-w-full overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
             Subscriptions
@@ -339,22 +339,22 @@ export default function Subscriptions() {
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="card p-4">
-          <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Monthly Total</p>
-          <p className="text-xl font-bold mt-1" style={{ color: 'var(--color-primary)' }}>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        <div className="card p-4 min-w-0">
+          <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>Monthly Total</p>
+          <p className="text-xl font-bold mt-1 truncate" style={{ color: 'var(--color-primary)' }}>
             {formatCurrency(summary?.total_monthly || 0, currency)}
           </p>
         </div>
-        <div className="card p-4">
-          <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Yearly Cost</p>
-          <p className="text-xl font-bold mt-1" style={{ color: 'var(--color-warning)' }}>
+        <div className="card p-4 min-w-0">
+          <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>Yearly Cost</p>
+          <p className="text-xl font-bold mt-1 truncate" style={{ color: 'var(--color-warning)' }}>
             {formatCurrency(summary?.total_yearly || 0, currency)}
           </p>
         </div>
-        <div className="card p-4">
-          <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Due Soon</p>
-          <p className="text-xl font-bold mt-1" style={{ color: 'var(--color-danger)' }}>
+        <div className="card p-4 min-w-0">
+          <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>Due Soon</p>
+          <p className="text-xl font-bold mt-1 truncate" style={{ color: 'var(--color-danger)' }}>
             {dueSoon.length}
           </p>
         </div>
@@ -389,7 +389,7 @@ export default function Subscriptions() {
           ))}
         </div>
       ) : subs.length === 0 ? (
-        <div className="card p-12 text-center">
+        <div className="card p-8 sm:p-12 text-center">
           <CreditCard size={32} className="mx-auto mb-3" style={{ color: 'var(--color-text-tertiary)' }} />
           <p className="font-medium" style={{ color: 'var(--color-text-primary)' }}>No subscriptions yet</p>
           <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>

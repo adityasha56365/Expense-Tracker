@@ -133,7 +133,7 @@ export default function ReceiptScanner() {
   const CATEGORY_OPTIONS = CATEGORIES.map(c => ({ value: c.value, label: `${c.icon} ${c.value}` }))
 
   return (
-    <div className="max-w-4xl space-y-6 animate-fade-in">
+    <div className="max-w-4xl space-y-6 animate-fade-in max-w-full overflow-hidden">
       <div>
         <h2 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Receipt Scanner</h2>
         <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
@@ -143,20 +143,20 @@ export default function ReceiptScanner() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Upload area */}
-        <div className="space-y-4">
+        <div className="space-y-4 min-w-0">
           <div className="card overflow-hidden">
             {!preview ? (
               <div
                 {...getRootProps()}
-                className={`p-12 flex flex-col items-center gap-4 text-center cursor-pointer transition-colors ${
+                className={`p-6 sm:p-12 flex flex-col items-center gap-4 text-center cursor-pointer transition-colors ${
                   isDragActive ? 'bg-teal-50 dark:bg-teal-950' : 'hover:bg-[var(--color-surface-subtle)]'
                 }`}
                 id="receipt-dropzone"
               >
                 <input {...getInputProps()} id="receipt-file-input" />
-                <div className="w-16 h-16 rounded-2xl flex items-center justify-center"
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center"
                      style={{ background: isDragActive ? '#ccfbf1' : 'var(--color-surface-subtle)', color: 'var(--color-primary)' }}>
-                  <Upload size={28} strokeWidth={1.5} />
+                  <Upload size={26} strokeWidth={1.5} />
                 </div>
                 <div>
                   <p className="font-semibold text-sm" style={{ color: 'var(--color-text-primary)' }}>
@@ -235,11 +235,11 @@ export default function ReceiptScanner() {
 
           {/* Raw text */}
           {result?.raw_text && (
-            <div className="card p-4">
+            <div className="card p-4 overflow-hidden">
               <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--color-text-tertiary)' }}>
                 Extracted Text
               </p>
-              <pre className="text-xs font-mono leading-relaxed whitespace-pre-wrap"
+              <pre className="text-xs font-mono leading-relaxed whitespace-pre-wrap overflow-x-auto max-h-60"
                    style={{ color: 'var(--color-text-secondary)', fontFamily: "'JetBrains Mono', monospace" }}>
                 {result.raw_text}
               </pre>
@@ -248,11 +248,11 @@ export default function ReceiptScanner() {
         </div>
 
         {/* Extracted fields */}
-        <div>
+        <div className="min-w-0">
           {result ? (
-            <div className="card p-6 space-y-5">
+            <div className="card p-4 sm:p-6 space-y-5">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
                      style={{ background: 'var(--color-success-muted)', color: 'var(--color-success)' }}>
                   <CheckCircle2 size={16} />
                 </div>
@@ -309,8 +309,8 @@ export default function ReceiptScanner() {
                   <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)' }}>
                     Extracted Line Items ({result.items.length})
                   </p>
-                  <div className="rounded-xl overflow-hidden border" style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface-subtle)' }}>
-                    <table className="w-full text-xs text-left">
+                  <div className="rounded-xl overflow-x-auto border w-full" style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface-subtle)' }}>
+                    <table className="w-full text-xs text-left min-w-[280px]">
                       <thead style={{ background: 'var(--color-surface-elevated)', color: 'var(--color-text-secondary)' }}>
                         <tr>
                           <th className="p-2 font-semibold">Item</th>
@@ -322,10 +322,10 @@ export default function ReceiptScanner() {
                       <tbody className="divide-y" style={{ borderColor: 'var(--color-border)' }}>
                         {result.items.map((item, idx) => (
                           <tr key={idx} style={{ color: 'var(--color-text-primary)' }}>
-                            <td className="p-2 font-medium">{item.name}</td>
+                            <td className="p-2 font-medium truncate max-w-[120px]">{item.name}</td>
                             <td className="p-2 text-center" style={{ color: 'var(--color-text-secondary)' }}>{item.qty}</td>
-                            <td className="p-2 text-right" style={{ color: 'var(--color-text-secondary)' }}>₹{item.price.toFixed(2)}</td>
-                            <td className="p-2 text-right font-semibold">₹{item.total.toFixed(2)}</td>
+                            <td className="p-2 text-right whitespace-nowrap" style={{ color: 'var(--color-text-secondary)' }}>₹{item.price.toFixed(2)}</td>
+                            <td className="p-2 text-right font-semibold whitespace-nowrap">₹{item.total.toFixed(2)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -376,7 +376,7 @@ export default function ReceiptScanner() {
               </Button>
             </div>
           ) : (
-            <div className="card p-10 flex flex-col items-center gap-4 text-center h-full justify-center"
+            <div className="card p-6 sm:p-10 flex flex-col items-center gap-4 text-center h-full justify-center"
                  style={{ minHeight: 300 }}>
               <div className="w-16 h-16 rounded-2xl flex items-center justify-center"
                    style={{ background: 'var(--color-surface-subtle)', color: 'var(--color-text-tertiary)' }}>
@@ -390,16 +390,16 @@ export default function ReceiptScanner() {
                   Upload a receipt image — it will be <strong>scanned automatically</strong> to extract merchant, amount, and date
                 </p>
               </div>
-              <div className="grid grid-cols-3 gap-3 w-full max-w-xs mt-2">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3 w-full max-w-xs mt-2">
                 {[
                   { icon: '🏪', label: 'Merchant' },
                   { icon: '💰', label: 'Amount' },
                   { icon: '📅', label: 'Date' },
                 ].map(f => (
-                  <div key={f.label} className="p-3 rounded-xl text-center"
+                  <div key={f.label} className="p-2 sm:p-3 rounded-xl text-center min-w-0"
                        style={{ background: 'var(--color-surface-subtle)' }}>
-                    <p className="text-xl">{f.icon}</p>
-                    <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>{f.label}</p>
+                    <p className="text-lg sm:text-xl">{f.icon}</p>
+                    <p className="text-[11px] sm:text-xs mt-1 truncate" style={{ color: 'var(--color-text-tertiary)' }}>{f.label}</p>
                   </div>
                 ))}
               </div>

@@ -1,11 +1,4 @@
 // src/pages/BankImport.jsx
-/**
- * Bank Statement Import — Multi-step wizard
- * Step 1: Upload CSV/Excel file
- * Step 2: Preview & adjust column mapping
- * Step 3: Review parsed rows + duplicate warnings
- * Step 4: Confirm import
- */
 import { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { importApi } from '../api/importApi'
@@ -52,21 +45,21 @@ function StepUpload({ onFile }) {
     <div className="space-y-6">
       <div {...getRootProps()}
         className={clsx(
-          'border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all',
+          'border-2 border-dashed rounded-2xl p-6 sm:p-12 text-center cursor-pointer transition-all',
           isDragActive ? 'border-[var(--color-primary)] bg-[var(--color-primary-muted)]' : 'border-[var(--color-border)] hover:border-[var(--color-primary)] hover:bg-[var(--color-surface-subtle)]'
         )}>
         <input {...getInputProps()} id="bank-file-input" />
-        <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
           style={{ background: isDragActive ? 'var(--color-primary)' : 'var(--color-surface-subtle)', color: isDragActive ? 'white' : 'var(--color-primary)' }}>
-          <Upload size={28} />
+          <Upload size={26} />
         </div>
-        <p className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+        <p className="font-semibold text-sm sm:text-base" style={{ color: 'var(--color-text-primary)' }}>
           {isDragActive ? 'Drop your bank statement here' : 'Upload Bank Statement'}
         </p>
-        <p className="text-sm mt-2" style={{ color: 'var(--color-text-secondary)' }}>
+        <p className="text-xs sm:text-sm mt-2" style={{ color: 'var(--color-text-secondary)' }}>
           Drag & drop or click to browse
         </p>
-        <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
+        <p className="text-[11px] sm:text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
           PDF, CSV or Excel (XLSX) · Max 10MB
         </p>
       </div>
@@ -76,14 +69,14 @@ function StepUpload({ onFile }) {
           style={{ color: 'var(--color-text-tertiary)' }}>
           Supported Banks & Formats
         </p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {BANKS.map(b => (
             <div key={b.name} className="flex items-center gap-2 p-2 rounded-lg"
               style={{ background: 'var(--color-surface-subtle)' }}>
               <span className="text-sm">🏦</span>
-              <div>
-                <p className="text-xs font-medium" style={{ color: 'var(--color-text-primary)' }}>{b.name}</p>
-                <p className="text-[10px]" style={{ color: 'var(--color-text-tertiary)' }}>{b.format}</p>
+              <div className="min-w-0">
+                <p className="text-xs font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{b.name}</p>
+                <p className="text-[10px] truncate" style={{ color: 'var(--color-text-tertiary)' }}>{b.format}</p>
               </div>
             </div>
           ))}
@@ -109,14 +102,14 @@ function StepPreview({ previewData, columnMap, setColumnMap, onBack, onNext, loa
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-2 p-3 rounded-xl" style={{ background: 'var(--color-success-muted)' }}>
-        <CheckCircle2 size={16} style={{ color: 'var(--color-success)' }} />
-        <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
+        <CheckCircle2 size={16} className="flex-shrink-0" style={{ color: 'var(--color-success)' }} />
+        <p className="text-xs sm:text-sm" style={{ color: 'var(--color-text-primary)' }}>
           File parsed successfully · <strong>{total_rows}</strong> rows found · {preview.length} previewed
         </p>
       </div>
 
       <div className="card overflow-hidden">
-        <div className="px-5 py-3 border-b" style={{ borderColor: 'var(--color-border)' }}>
+        <div className="px-4 sm:px-5 py-3 border-b" style={{ borderColor: 'var(--color-border)' }}>
           <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             Column Mapping
           </p>
@@ -126,12 +119,12 @@ function StepPreview({ previewData, columnMap, setColumnMap, onBack, onNext, loa
         </div>
         <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
           {headers.map(col => (
-            <div key={col} className="flex items-center gap-3">
+            <div key={col} className="flex items-center gap-3 min-w-0">
               <span className="text-xs font-mono flex-1 truncate" style={{ color: 'var(--color-text-secondary)' }}>
                 {col}
               </span>
               <select
-                className="form-input text-xs w-32 h-8"
+                className="form-input text-xs w-28 sm:w-32 h-8 flex-shrink-0"
                 value={
                   columnMap.date === col ? 'date' :
                   columnMap.description === col ? 'description' :
@@ -143,7 +136,6 @@ function StepPreview({ previewData, columnMap, setColumnMap, onBack, onNext, loa
                   const val = e.target.value
                   setColumnMap(prev => {
                     const cleaned = { ...prev }
-                    // Remove this col from other mappings
                     Object.keys(cleaned).forEach(k => { if (cleaned[k] === col) delete cleaned[k] })
                     if (val !== 'ignore') cleaned[val] = col
                     return cleaned
@@ -160,15 +152,15 @@ function StepPreview({ previewData, columnMap, setColumnMap, onBack, onNext, loa
       {/* Preview table */}
       {preview.length > 0 && (
         <div className="card overflow-hidden">
-          <div className="px-5 py-3 border-b" style={{ borderColor: 'var(--color-border)' }}>
+          <div className="px-4 sm:px-5 py-3 border-b" style={{ borderColor: 'var(--color-border)' }}>
             <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>Preview (first 10 rows)</p>
           </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto w-full">
             <table className="w-full text-xs">
               <thead>
                 <tr style={{ background: 'var(--color-surface-subtle)' }}>
                   {['Date', 'Description', 'Amount', 'Type', 'Category'].map(h => (
-                    <th key={h} className="px-4 py-2 text-left font-semibold"
+                    <th key={h} className="px-3 sm:px-4 py-2 text-left font-semibold"
                       style={{ color: 'var(--color-text-tertiary)' }}>{h}</th>
                   ))}
                 </tr>
@@ -176,15 +168,15 @@ function StepPreview({ previewData, columnMap, setColumnMap, onBack, onNext, loa
               <tbody>
                 {preview.map((row, i) => (
                   <tr key={i} className="border-t" style={{ borderColor: 'var(--color-border-subtle)' }}>
-                    <td className="px-4 py-2" style={{ color: 'var(--color-text-secondary)' }}>{row.date?.split('T')[0]}</td>
-                    <td className="px-4 py-2 max-w-xs truncate" style={{ color: 'var(--color-text-primary)' }}>{row.title}</td>
-                    <td className="px-4 py-2 tabular-nums" style={{ color: 'var(--color-text-primary)' }}>₹{row.amount}</td>
-                    <td className="px-4 py-2">
+                    <td className="px-3 sm:px-4 py-2 whitespace-nowrap" style={{ color: 'var(--color-text-secondary)' }}>{row.date?.split('T')[0]}</td>
+                    <td className="px-3 sm:px-4 py-2 max-w-xs truncate" style={{ color: 'var(--color-text-primary)' }}>{row.title}</td>
+                    <td className="px-3 sm:px-4 py-2 tabular-nums whitespace-nowrap" style={{ color: 'var(--color-text-primary)' }}>₹{row.amount}</td>
+                    <td className="px-3 sm:px-4 py-2">
                       <span className={clsx('badge', row.type === 'income' ? 'badge-income' : 'badge-expense')}>
                         {row.type}
                       </span>
                     </td>
-                    <td className="px-4 py-2" style={{ color: 'var(--color-text-secondary)' }}>
+                    <td className="px-3 sm:px-4 py-2 whitespace-nowrap" style={{ color: 'var(--color-text-secondary)' }}>
                       {row.category}
                       {row.category_confidence && (
                         <span className="ml-1" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -203,7 +195,7 @@ function StepPreview({ previewData, columnMap, setColumnMap, onBack, onNext, loa
       <div className="flex gap-3 justify-between">
         <Button variant="secondary" icon={ArrowLeft} onClick={onBack}>Back</Button>
         <Button variant="primary" icon={ArrowRight} onClick={onNext} loading={loading}>
-          Continue ({total_rows} transactions)
+          Continue ({total_rows})
         </Button>
       </div>
     </div>
@@ -279,7 +271,7 @@ export default function BankImport() {
   }
 
   return (
-    <div className="max-w-3xl space-y-6 animate-fade-in">
+    <div className="max-w-3xl space-y-6 animate-fade-in max-w-full overflow-hidden">
       {/* Header */}
       <div>
         <h2 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
@@ -291,30 +283,29 @@ export default function BankImport() {
       </div>
 
       {/* Step indicator */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5 flex-wrap">
         {STEPS.map((s, i) => (
-          <div key={s} className="flex items-center gap-2">
+          <div key={s} className="flex items-center gap-1.5">
             <div className={clsx(
-              'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all',
-              i < step ? 'text-white' : i === step ? 'text-white' : ''
+              'w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all flex-shrink-0'
             )} style={{
               background: i < step ? 'var(--color-success)' : i === step ? 'var(--color-primary)' : 'var(--color-border)',
               color: i >= step ? 'var(--color-text-tertiary)' : 'white',
             }}>
-              {i < step ? <CheckCircle2 size={14} /> : i + 1}
+              {i < step ? <CheckCircle2 size={13} /> : i + 1}
             </div>
             <span className="text-xs hidden sm:block" style={{ color: i === step ? 'var(--color-text-primary)' : 'var(--color-text-tertiary)' }}>
               {s}
             </span>
             {i < STEPS.length - 1 && (
-              <div className="w-8 h-px mx-1" style={{ background: 'var(--color-border)' }} />
+              <div className="w-4 sm:w-6 h-px mx-0.5" style={{ background: 'var(--color-border)' }} />
             )}
           </div>
         ))}
       </div>
 
       {/* Step content */}
-      <div className="card p-6">
+      <div className="card p-4 sm:p-6 overflow-hidden">
         {step === 0 && <StepUpload onFile={handleFile} />}
         {step === 1 && previewData && (
           <StepPreview
@@ -328,9 +319,9 @@ export default function BankImport() {
         )}
         {step === 2 && result && (
           <div className="text-center space-y-5">
-            <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto"
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto"
               style={{ background: 'var(--color-success-muted)' }}>
-              <CheckCircle2 size={40} style={{ color: 'var(--color-success)' }} />
+              <CheckCircle2 size={36} style={{ color: 'var(--color-success)' }} />
             </div>
             <div>
               <h3 className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
@@ -340,16 +331,16 @@ export default function BankImport() {
                 Your bank statement has been imported successfully
               </p>
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
                 { label: 'Imported', value: result.imported, color: 'var(--color-success)' },
                 { label: 'Skipped (duplicates)', value: result.skipped_duplicates, color: 'var(--color-warning)' },
                 { label: 'Errors', value: result.errors, color: 'var(--color-danger)' },
               ].map(item => (
-                <div key={item.label} className="p-3 rounded-xl"
+                <div key={item.label} className="p-3 rounded-xl min-w-0"
                   style={{ background: 'var(--color-surface-subtle)' }}>
-                  <p className="text-2xl font-bold" style={{ color: item.color }}>{item.value}</p>
-                  <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>{item.label}</p>
+                  <p className="text-2xl font-bold truncate" style={{ color: item.color }}>{item.value}</p>
+                  <p className="text-xs mt-1 truncate" style={{ color: 'var(--color-text-tertiary)' }}>{item.label}</p>
                 </div>
               ))}
             </div>

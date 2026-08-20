@@ -83,6 +83,7 @@ html {
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 body {
@@ -93,6 +94,7 @@ body {
   margin: 0;
   padding: 0;
   transition: background-color var(--transition-slow), color var(--transition-slow);
+  overflow-x: hidden;
 }
 
 /* === Scrollbar === */
@@ -126,6 +128,8 @@ body {
 .app-layout {
   display: flex;
   min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .main-content {
@@ -142,8 +146,8 @@ body {
 }
 
 @media (max-width: 1024px) {
-  .main-content {
-    margin-left: 0;
+  .main-content, .main-content.sidebar-collapsed {
+    margin-left: 0 !important;
   }
 }
 
@@ -151,12 +155,21 @@ body {
   flex: 1;
   padding: 1.5rem 2rem;
   overflow-y: auto;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 @media (max-width: 768px) {
   .page-container {
-    padding: 1rem;
+    padding: 1rem 0.875rem;
   }
+}
+
+/* === Responsive Table Container === */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* === Surface / Card === */
@@ -166,6 +179,7 @@ body {
   border-radius: 16px;
   box-shadow: var(--shadow-sm);
   transition: box-shadow var(--transition-base);
+  max-width: 100%;
 }
 
 .card:hover {
@@ -251,6 +265,17 @@ body {
   font-size: 0.75rem;
   font-weight: 500;
   line-height: 1.5;
+  white-space: nowrap;
+}
+
+.badge-income {
+  background: var(--color-success-muted);
+  color: var(--color-success);
+}
+
+.badge-expense {
+  background: var(--color-danger-muted);
+  color: var(--color-danger);
 }
 
 /* === Focus Ring === */
@@ -262,7 +287,7 @@ body {
 /* === Sidebar Transition === */
 .sidebar {
   width: var(--sidebar-width);
-  min-height: 100vh;
+  height: 100vh;
   position: fixed;
   top: 0;
   left: 0;
@@ -282,6 +307,7 @@ body {
 @media (max-width: 1024px) {
   .sidebar {
     transform: translateX(-100%);
+    width: 280px !important;
   }
   .sidebar.open {
     transform: translateX(0);
@@ -306,6 +332,7 @@ body {
 .chart-container {
   position: relative;
   width: 100%;
+  max-width: 100%;
 }
 
 /* === Table === */
@@ -360,6 +387,7 @@ body {
     transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
     outline: none;
     font-family: inherit;
+    max-width: 100%;
   }
 
   .form-select {
@@ -403,6 +431,7 @@ body {
   white-space: nowrap;
   font-family: inherit;
   line-height: 1;
+  max-width: 100%;
 }
 
 .btn:disabled {
@@ -510,7 +539,7 @@ body {
 .amount-positive { color: var(--color-success); }
 .amount-negative { color: var(--color-danger); }
 
-/* === Receipt Scanner — scan line animation === */
+/* === Scan Line Animation === */
 @keyframes scanLine {
   0%   { top: 0%; opacity: 1; }
   90%  { top: 100%; opacity: 1; }
@@ -525,4 +554,3 @@ body {
 .animate-spin {
   animation: spin 0.8s linear infinite;
 }
-

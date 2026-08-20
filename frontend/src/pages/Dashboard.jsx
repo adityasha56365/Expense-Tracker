@@ -12,7 +12,6 @@ import RecentTransactions from '../components/dashboard/RecentTransactions'
 import BudgetOverview from '../components/dashboard/BudgetOverview'
 import InsightPanel from '../components/dashboard/InsightPanel'
 import { MetricCardSkeleton, ChartSkeleton, CardSkeleton } from '../components/common/LoadingSkeleton'
-import { formatPercentage } from '../utils/formatters'
 import { useNavigate } from 'react-router-dom'
 import Button from '../components/common/Button'
 
@@ -38,18 +37,18 @@ export default function Dashboard() {
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in max-w-full overflow-hidden">
       {/* Welcome header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
             {greeting}, {user?.name?.split(' ')[0] || 'there'} 👋
           </h2>
-          <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
             Here's your financial overview for {now.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
           <Button variant="secondary" size="sm" icon={ScanLine} onClick={() => navigate('/receipt')}>
             Scan Receipt
           </Button>
@@ -60,7 +59,7 @@ export default function Dashboard() {
       </div>
 
       {/* Summary cards row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
         {isLoading ? (
           <>
             <MetricCardSkeleton />
@@ -115,14 +114,14 @@ export default function Dashboard() {
 
       {/* Charts row */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <div className="xl:col-span-2">
+        <div className="xl:col-span-2 overflow-hidden">
           {isLoading ? (
             <ChartSkeleton height={240} />
           ) : (
             <SpendingTrendChart data={monthlyTrend} />
           )}
         </div>
-        <div>
+        <div className="overflow-hidden">
           {isLoading ? (
             <ChartSkeleton height={240} />
           ) : (
@@ -134,7 +133,7 @@ export default function Dashboard() {
       {/* Bottom row */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         {/* Recent transactions */}
-        <div className="xl:col-span-2">
+        <div className="xl:col-span-2 overflow-hidden">
           {loading.transactions ? (
             <CardSkeleton rows={6} />
           ) : (
@@ -150,7 +149,7 @@ export default function Dashboard() {
       </div>
 
       {/* Quick action shortcuts */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           { icon: Plus, label: 'Add Transaction', to: '/transactions', color: 'var(--color-primary-muted)', iconColor: 'var(--color-primary)' },
           { icon: ScanLine, label: 'Scan Receipt', to: '/receipt', color: 'var(--color-info-muted)', iconColor: 'var(--color-info)' },
@@ -160,13 +159,13 @@ export default function Dashboard() {
           <button
             key={label}
             onClick={() => navigate(to)}
-            className="card p-4 flex items-center gap-3 hover:shadow-md transition-all group cursor-pointer text-left"
+            className="card p-4 flex items-center gap-3 hover:shadow-md transition-all group cursor-pointer text-left w-full"
           >
             <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110"
                  style={{ background: color, color: iconColor }}>
               <Icon size={18} />
             </div>
-            <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>{label}</span>
+            <span className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{label}</span>
           </button>
         ))}
       </div>

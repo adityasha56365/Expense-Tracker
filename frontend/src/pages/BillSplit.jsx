@@ -58,7 +58,7 @@ function QRModal({ isOpen, onClose, split }) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Share Bill" size="sm">
       <div className="text-center space-y-4">
-        <canvas ref={canvasRef} className="mx-auto rounded-xl" style={{ maxWidth: '200px' }} />
+        <canvas ref={canvasRef} className="mx-auto rounded-xl max-w-[200px]" />
         <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
           Scan this QR or copy the link to share
         </p>
@@ -128,7 +128,7 @@ function CreateSplitModal({ isOpen, onClose, onSubmit }) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Split a Bill" size="lg">
       <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Input label="Bill Title" placeholder="e.g. Dinner at Tao" required
             value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
           <Input label="Total Amount (₹)" type="number" required
@@ -147,7 +147,7 @@ function CreateSplitModal({ isOpen, onClose, onSubmit }) {
             ].map(t => (
               <button key={t.key} type="button"
                 onClick={() => setForm(f => ({ ...f, split_type: t.key }))}
-                className="flex-1 py-2 rounded-xl text-sm border transition-all"
+                className="flex-1 py-2 rounded-xl text-xs sm:text-sm border transition-all"
                 style={{
                   borderColor: form.split_type === t.key ? 'var(--color-primary)' : 'var(--color-border)',
                   background: form.split_type === t.key ? 'var(--color-primary-muted)' : 'var(--color-surface-subtle)',
@@ -173,15 +173,15 @@ function CreateSplitModal({ isOpen, onClose, onSubmit }) {
           </div>
           {participants.map((p, i) => (
             <div key={i} className="flex items-center gap-2">
-              <input className="form-input flex-1" placeholder={`Person ${i + 1} name`}
+              <input className="form-input flex-1 min-w-0" placeholder={`Person ${i + 1} name`}
                 value={p.name} onChange={e => updateParticipant(i, 'name', e.target.value)} />
               {form.split_type !== 'equal' && (
-                <input className="form-input w-24" placeholder={getShareLabel()} type="number"
+                <input className="form-input w-20 sm:w-24 flex-shrink-0" placeholder={getShareLabel()} type="number"
                   value={p.share} onChange={e => updateParticipant(i, 'share', e.target.value)} />
               )}
               {i >= 2 && (
                 <button type="button" onClick={() => removeParticipant(i)}
-                  className="btn btn-ghost btn-sm !p-1.5 rounded-lg hover:!text-red-500">
+                  className="btn btn-ghost btn-sm !p-1.5 rounded-lg hover:!text-red-500 flex-shrink-0" aria-label="Remove person">
                   <X size={14} />
                 </button>
               )}
@@ -209,22 +209,22 @@ function SplitCard({ split, onSettle, onDelete, onShare }) {
   return (
     <div className="card overflow-hidden">
       <div className="p-4">
-        <div className="flex items-start justify-between mb-3">
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-sm" style={{ color: 'var(--color-text-primary)' }}>
+        <div className="flex items-start justify-between mb-3 gap-2">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="font-semibold text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
                 {split.title}
               </h3>
               <span className={clsx('badge', isSettled ? 'badge-income' : 'badge-expense')}>
                 {isSettled ? 'Settled' : 'Pending'}
               </span>
             </div>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
+            <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--color-text-tertiary)' }}>
               {formatDate(split.date)} · {split.split_type} split · {paidCount}/{totalParticipants} paid
             </p>
           </div>
-          <div className="text-right">
-            <p className="text-lg font-bold tabular-nums" style={{ color: 'var(--color-text-primary)' }}>
+          <div className="text-right flex-shrink-0">
+            <p className="text-base sm:text-lg font-bold tabular-nums" style={{ color: 'var(--color-text-primary)' }}>
               {formatCurrency(split.total_amount, currency)}
             </p>
           </div>
@@ -243,7 +243,7 @@ function SplitCard({ split, onSettle, onDelete, onShare }) {
               onClick={() => !isSettled && onSettle(split._id, p.name, !p.paid)}
             >
               {p.paid ? <CheckCircle2 size={10} /> : <div className="w-2 h-2 rounded-full bg-current opacity-40" />}
-              <span className="font-medium">{p.name}</span>
+              <span className="font-medium truncate max-w-[80px]">{p.name}</span>
               <span className="tabular-nums">₹{p.share?.toFixed(0) || p.share_amount?.toFixed(0)}</span>
             </div>
           ))}
@@ -258,11 +258,11 @@ function SplitCard({ split, onSettle, onDelete, onShare }) {
           </button>
           <div className="flex-1" />
           <button onClick={() => onShare(split)}
-            className="btn btn-ghost btn-sm !p-1.5 rounded-lg" title="Share / QR">
+            className="btn btn-ghost btn-sm !p-1.5 rounded-lg" title="Share / QR" aria-label="Share QR">
             <QrCode size={14} />
           </button>
           <button onClick={() => onDelete(split._id)}
-            className="btn btn-ghost btn-sm !p-1.5 rounded-lg hover:!text-red-500" title="Delete">
+            className="btn btn-ghost btn-sm !p-1.5 rounded-lg hover:!text-red-500" title="Delete" aria-label="Delete split">
             <Trash2 size={14} />
           </button>
         </div>
@@ -270,21 +270,16 @@ function SplitCard({ split, onSettle, onDelete, onShare }) {
         {expanded && (
           <div className="mt-3 pt-3 border-t space-y-2" style={{ borderColor: 'var(--color-border-subtle)' }}>
             {split.participants.map((p, i) => (
-              <div key={i} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white"
+              <div key={i} className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
                     style={{ background: p.paid ? 'var(--color-success)' : 'var(--color-border)' }}>
                     {p.name[0]?.toUpperCase()}
                   </div>
-                  <span className="text-sm" style={{ color: 'var(--color-text-primary)' }}>{p.name}</span>
-                  {p.paid_at && (
-                    <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-                      · Paid {formatDate(p.paid_at)}
-                    </span>
-                  )}
+                  <span className="text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>{p.name}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="tabular-nums text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <span className="tabular-nums text-xs sm:text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
                     {formatCurrency(p.share || p.share_amount || 0, currency)}
                   </span>
                   {!isSettled && (
@@ -373,8 +368,8 @@ export default function BillSplit() {
     }, 0)
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 animate-fade-in max-w-full overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Bill Splitting</h2>
           <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
@@ -387,20 +382,20 @@ export default function BillSplit() {
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="card p-4">
-          <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Total Splits</p>
-          <p className="text-2xl font-bold mt-1" style={{ color: 'var(--color-text-primary)' }}>{splits.length}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        <div className="card p-4 min-w-0">
+          <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>Total Splits</p>
+          <p className="text-xl sm:text-2xl font-bold mt-1 truncate" style={{ color: 'var(--color-text-primary)' }}>{splits.length}</p>
         </div>
-        <div className="card p-4">
-          <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Pending from You</p>
-          <p className="text-2xl font-bold mt-1" style={{ color: 'var(--color-danger)' }}>
+        <div className="card p-4 min-w-0">
+          <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>Pending from You</p>
+          <p className="text-xl sm:text-2xl font-bold mt-1 truncate" style={{ color: 'var(--color-danger)' }}>
             {formatCurrency(totalPending, currency)}
           </p>
         </div>
-        <div className="card p-4">
-          <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Settled</p>
-          <p className="text-2xl font-bold mt-1" style={{ color: 'var(--color-success)' }}>
+        <div className="card p-4 min-w-0">
+          <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>Settled</p>
+          <p className="text-xl sm:text-2xl font-bold mt-1 truncate" style={{ color: 'var(--color-success)' }}>
             {splits.filter(s => s.status === 'settled').length}
           </p>
         </div>
@@ -419,7 +414,7 @@ export default function BillSplit() {
           ))}
         </div>
       ) : splits.length === 0 ? (
-        <div className="card p-12 text-center">
+        <div className="card p-8 sm:p-12 text-center">
           <Users size={32} className="mx-auto mb-3" style={{ color: 'var(--color-text-tertiary)' }} />
           <p className="font-medium" style={{ color: 'var(--color-text-primary)' }}>No splits yet</p>
           <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>

@@ -80,9 +80,9 @@ export default function Transactions() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in max-w-full overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
             Transactions
@@ -91,7 +91,7 @@ export default function Transactions() {
             {filtered.length} transactions found
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
           <Button variant="secondary" size="sm" icon={Download} onClick={handleExport}>
             Export
           </Button>
@@ -102,21 +102,21 @@ export default function Transactions() {
       </div>
 
       {/* Quick stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         {[
           { label: 'Total Transactions', value: filtered.length, color: 'var(--color-text-primary)' },
           { label: 'Total Income', value: `+₹${totalIncome.toLocaleString('en-IN')}`, color: 'var(--color-success)' },
           { label: 'Total Expenses', value: `-₹${totalExpense.toLocaleString('en-IN')}`, color: 'var(--color-danger)' },
         ].map(s => (
-          <div key={s.label} className="card p-4">
-            <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>{s.label}</p>
-            <p className="text-lg font-bold tabular-nums mt-1" style={{ color: s.color }}>{s.value}</p>
+          <div key={s.label} className="card p-4 min-w-0">
+            <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>{s.label}</p>
+            <p className="text-lg font-bold tabular-nums mt-1 truncate" style={{ color: s.color }}>{s.value}</p>
           </div>
         ))}
       </div>
 
       {/* Filters */}
-      <div className="card p-4">
+      <div className="card p-4 overflow-hidden">
         <TransactionFilterBar
           filters={filters}
           onChange={setFilters}
@@ -127,7 +127,7 @@ export default function Transactions() {
       {/* Table */}
       <div className="card overflow-hidden">
         {loading.transactions ? (
-          <div className="p-4">
+          <div className="p-4 table-responsive">
             <table className="data-table">
               <thead>
                 <tr>

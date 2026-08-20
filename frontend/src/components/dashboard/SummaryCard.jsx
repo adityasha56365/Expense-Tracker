@@ -32,36 +32,36 @@ export default function SummaryCard({
     : value
 
   return (
-    <div className="card p-5 flex flex-col gap-4 hover:shadow-md transition-shadow"
+    <div className="card p-4 sm:p-5 flex flex-col justify-between gap-3 sm:gap-4 hover:shadow-md transition-shadow min-w-0 w-full"
          style={{ background: variantStyle.bg }}>
-      <div className="flex items-start justify-between">
-        <p className="text-sm font-medium" style={{ color: textSecondary }}>{title}</p>
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-xs sm:text-sm font-medium truncate" style={{ color: textSecondary }}>{title}</p>
         {Icon && (
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center flex-shrink-0"
                style={{ background: variantStyle.iconBg, color: variantStyle.iconColor }}>
-            <Icon size={18} />
+            <Icon size={16} />
           </div>
         )}
       </div>
 
-      <div>
-        <p className="text-2xl font-bold tabular-nums leading-none" style={{ color: textPrimary }}>
+      <div className="min-w-0">
+        <p className="text-xl sm:text-2xl font-bold tabular-nums leading-tight truncate" style={{ color: textPrimary }}>
           {displayValue}
         </p>
         {(trend !== undefined || trendLabel) && (
-          <div className="flex items-center gap-1 mt-2">
+          <div className="flex items-center gap-1 mt-1.5 flex-wrap">
             {trend !== undefined && (
-              <>
+              <div className="flex items-center gap-0.5">
                 {isPositiveTrend
                   ? <TrendingUp size={13} style={{ color: isWhite ? 'rgba(255,255,255,0.8)' : trendColor }} />
                   : <TrendingDown size={13} style={{ color: isWhite ? 'rgba(255,255,255,0.8)' : trendColor }} />}
                 <span className="text-xs font-medium" style={{ color: isWhite ? 'rgba(255,255,255,0.8)' : trendColor }}>
                   {isPositiveTrend ? '+' : ''}{trend}%
                 </span>
-              </>
+              </div>
             )}
             {trendLabel && (
-              <span className="text-xs" style={{ color: textTertiary }}>{trendLabel}</span>
+              <span className="text-[11px] sm:text-xs truncate" style={{ color: textTertiary }}>{trendLabel}</span>
             )}
           </div>
         )}

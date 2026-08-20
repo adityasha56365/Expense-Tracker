@@ -139,7 +139,7 @@ function GoalFormModal({ isOpen, onClose, onSubmit, initialData }) {
 
         <div className="space-y-2">
           <label className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>Color</label>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {GOAL_COLORS.map(c => (
               <button key={c} type="button" onClick={() => setForm(f => ({ ...f, color: c }))}
                 className="w-7 h-7 rounded-full border-2 transition-all"
@@ -152,7 +152,7 @@ function GoalFormModal({ isOpen, onClose, onSubmit, initialData }) {
         <Input label="Goal Title" placeholder="e.g. MacBook Pro, Vacation in Goa" required
           value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Input label="Target Amount (₹)" type="number" placeholder="50000" required
             value={form.target_amount} onChange={e => setForm(f => ({ ...f, target_amount: e.target.value }))} />
           <Input label="Already Saved (₹)" type="number" placeholder="0"
@@ -239,31 +239,31 @@ function GoalCard({ goal, onEdit, onDelete, onContribute }) {
   return (
     <div className="card overflow-hidden transition-all hover:shadow-lg group"
       style={{ borderTop: `3px solid ${color}` }}>
-      <div className="p-5">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-3">
+      <div className="p-4 sm:p-5">
+        <div className="flex items-start justify-between mb-4 gap-2">
+          <div className="flex items-center gap-3 min-w-0">
             <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0"
               style={{ background: `${color}20` }}>
               {goal.icon || '🎯'}
             </div>
-            <div>
-              <h3 className="font-semibold text-sm" style={{ color: 'var(--color-text-primary)' }}>
+            <div className="min-w-0">
+              <h3 className="font-semibold text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
                 {goal.title}
               </h3>
               {goal.target_date && (
-                <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
+                <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--color-text-tertiary)' }}>
                   Target: {formatDate(goal.target_date)}
                 </p>
               )}
             </div>
           </div>
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity flex-shrink-0">
             {!isCompleted && (
-              <button onClick={onEdit} className="btn btn-ghost btn-sm !p-1.5 rounded-lg">
+              <button onClick={onEdit} className="btn btn-ghost btn-sm !p-1.5 rounded-lg" aria-label="Edit goal">
                 <Edit2 size={13} />
               </button>
             )}
-            <button onClick={onDelete} className="btn btn-ghost btn-sm !p-1.5 rounded-lg hover:!text-red-500">
+            <button onClick={onDelete} className="btn btn-ghost btn-sm !p-1.5 rounded-lg hover:!text-red-500" aria-label="Delete goal">
               <Trash2 size={13} />
             </button>
           </div>
@@ -271,23 +271,23 @@ function GoalCard({ goal, onEdit, onDelete, onContribute }) {
 
         <div className="flex items-center gap-4">
           <ProgressRing pct={pct} color={isCompleted ? '#10b981' : color} />
-          <div className="flex-1 space-y-2">
-            <div className="flex justify-between text-xs">
+          <div className="flex-1 space-y-2 min-w-0">
+            <div className="flex justify-between text-xs gap-1">
               <span style={{ color: 'var(--color-text-tertiary)' }}>Saved</span>
-              <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+              <span className="font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
                 {formatCurrency(goal.current_amount, currency)}
               </span>
             </div>
-            <div className="flex justify-between text-xs">
+            <div className="flex justify-between text-xs gap-1">
               <span style={{ color: 'var(--color-text-tertiary)' }}>Target</span>
-              <span style={{ color: 'var(--color-text-secondary)' }}>
+              <span className="truncate" style={{ color: 'var(--color-text-secondary)' }}>
                 {formatCurrency(goal.target_amount, currency)}
               </span>
             </div>
             {goal.remaining_amount > 0 && (
-              <div className="flex justify-between text-xs">
+              <div className="flex justify-between text-xs gap-1">
                 <span style={{ color: 'var(--color-text-tertiary)' }}>Remaining</span>
-                <span style={{ color }}>{formatCurrency(goal.remaining_amount, currency)}</span>
+                <span className="truncate" style={{ color }}>{formatCurrency(goal.remaining_amount, currency)}</span>
               </div>
             )}
           </div>
@@ -308,7 +308,7 @@ function GoalCard({ goal, onEdit, onDelete, onContribute }) {
         )}
 
         {goal.monthly_needed && !isCompleted && (
-          <p className="text-xs text-center mt-2" style={{ color: 'var(--color-text-tertiary)' }}>
+          <p className="text-xs text-center mt-2 truncate" style={{ color: 'var(--color-text-tertiary)' }}>
             Save {formatCurrency(goal.monthly_needed, currency)}/month to reach goal on time
           </p>
         )}
@@ -413,11 +413,11 @@ export default function SavingsGoals() {
   const completedGoals = goals.filter(g => g.is_completed).length
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in max-w-full overflow-hidden">
       <Confetti show={showConfetti} />
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Savings Goals</h2>
           <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
@@ -431,18 +431,18 @@ export default function SavingsGoals() {
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         {[
           { label: 'Total Goals', value: goals.length, icon: '🎯', color: '#6366f1' },
           { label: 'Total Saved', value: formatCurrency(totalSaved, currency), icon: '💰', color: '#10b981' },
           { label: 'Goals Completed', value: completedGoals, icon: '🏆', color: '#f59e0b' },
         ].map(item => (
-          <div key={item.label} className="card p-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
+          <div key={item.label} className="card p-4 flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
               style={{ background: `${item.color}20` }}>{item.icon}</div>
-            <div>
-              <p className="text-lg font-bold" style={{ color: item.color }}>{item.value}</p>
-              <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>{item.label}</p>
+            <div className="min-w-0">
+              <p className="text-lg font-bold truncate" style={{ color: item.color }}>{item.value}</p>
+              <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>{item.label}</p>
             </div>
           </div>
         ))}
@@ -465,7 +465,7 @@ export default function SavingsGoals() {
           ))}
         </div>
       ) : goals.length === 0 ? (
-        <div className="card p-16 flex flex-col items-center gap-4 text-center">
+        <div className="card p-8 sm:p-16 flex flex-col items-center gap-4 text-center">
           <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl"
             style={{ background: 'var(--color-primary-muted)' }}>🎯</div>
           <div>

@@ -69,7 +69,7 @@ function BudgetFormModal({ isOpen, onClose, onSubmit, initialData, transactions 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={initialData ? 'Edit Budget' : 'Create Budget'} size="lg">
       <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>Month</label>
             <select className="form-input" value={form.month} onChange={e => setForm(f => ({...f, month: e.target.value}))}>
@@ -90,7 +90,7 @@ function BudgetFormModal({ isOpen, onClose, onSubmit, initialData, transactions 
           <p className="text-sm font-medium mb-3" style={{ color: 'var(--color-text-secondary)' }}>
             Category Limits (optional)
           </p>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {form.category_budgets.map((cb, idx) => {
               const cat = CATEGORY_MAP[cb.category]
               return (
@@ -170,8 +170,8 @@ export default function Budgets() {
   const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 animate-fade-in max-w-full overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Budgets</h2>
           <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
@@ -184,7 +184,7 @@ export default function Budgets() {
       </div>
 
       {budgets.length === 0 ? (
-        <div className="card p-16 flex flex-col items-center gap-4 text-center">
+        <div className="card p-8 sm:p-16 flex flex-col items-center gap-4 text-center">
           <div className="w-16 h-16 rounded-2xl flex items-center justify-center"
                style={{ background: 'var(--color-primary-muted)', color: 'var(--color-primary)' }}>
             <TrendingUp size={32} strokeWidth={1.5} />
@@ -210,7 +210,7 @@ export default function Budgets() {
             return (
               <div key={budget._id} className="card overflow-hidden">
                 {/* Budget header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b"
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-6 py-4 border-b"
                      style={{ borderColor: 'var(--color-border)' }}>
                   <div>
                     <h3 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
@@ -220,16 +220,16 @@ export default function Budgets() {
                       Total budget: {formatCurrency(budget.total_budget, currency)}
                     </p>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="text-right">
-                      <p className={clsx('tabular-nums font-bold', isOverall ? 'amount-negative' : 'amount-positive')}>
+                  <div className="flex items-center justify-between sm:justify-end gap-3">
+                    <div className="text-left sm:text-right">
+                      <p className={clsx('tabular-nums font-bold text-base sm:text-lg', isOverall ? 'amount-negative' : 'amount-positive')}>
                         {formatCurrency(totalSpent, currency)}
                       </p>
                       <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
                         spent of {formatCurrency(budget.total_budget, currency)}
                       </p>
                     </div>
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 flex-shrink-0">
                       <button className="btn btn-ghost btn-sm !p-1.5 rounded-lg"
                               onClick={() => { setEditTarget(budget); setFormOpen(true) }}>
                         <Edit2 size={14} />
@@ -243,7 +243,7 @@ export default function Budgets() {
                 </div>
 
                 {/* Overall progress */}
-                <div className="px-6 py-4 border-b" style={{ borderColor: 'var(--color-border-subtle)' }}>
+                <div className="px-4 sm:px-6 py-4 border-b" style={{ borderColor: 'var(--color-border-subtle)' }}>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
                       Overall Budget
@@ -264,12 +264,12 @@ export default function Budgets() {
                 </div>
 
                 {/* Category budgets */}
-                <div className="p-6">
+                <div className="p-4 sm:p-6">
                   <p className="text-xs font-semibold uppercase tracking-wider mb-4"
                      style={{ color: 'var(--color-text-tertiary)' }}>
                     Category Limits
                   </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
                     {budget.category_budgets?.map(({ category, budget: limit }) => {
                       const spent = spentByCategory[category] || 0
                       const pct = Math.min((spent / limit) * 100, 100)
@@ -279,21 +279,21 @@ export default function Budgets() {
                       const remaining = Math.max(limit - spent, 0)
 
                       return (
-                        <div key={category} className="p-4 rounded-xl border"
+                        <div key={category} className="p-4 rounded-xl border min-w-0"
                              style={{ borderColor: isOver ? 'var(--color-danger)' : 'var(--color-border)', background: 'var(--color-surface-subtle)' }}>
                           <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 min-w-0">
                               <span>{cat?.icon}</span>
-                              <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+                              <span className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
                                 {category}
                               </span>
                             </div>
                             {isOver ? (
-                              <AlertTriangle size={14} style={{ color: 'var(--color-danger)' }} />
+                              <AlertTriangle size={14} className="flex-shrink-0" style={{ color: 'var(--color-danger)' }} />
                             ) : pct >= 80 ? (
-                              <AlertTriangle size={14} style={{ color: 'var(--color-warning)' }} />
+                              <AlertTriangle size={14} className="flex-shrink-0" style={{ color: 'var(--color-warning)' }} />
                             ) : (
-                              <CheckCircle2 size={14} style={{ color: 'var(--color-success)' }} />
+                              <CheckCircle2 size={14} className="flex-shrink-0" style={{ color: 'var(--color-success)' }} />
                             )}
                           </div>
                           <div className="progress-bar mb-2">
@@ -303,10 +303,10 @@ export default function Budgets() {
                             }} />
                           </div>
                           <div className="flex justify-between text-xs">
-                            <span className={isOver ? 'amount-negative font-medium' : ''} style={{ color: isOver ? undefined : 'var(--color-text-secondary)' }}>
+                            <span className={isOver ? 'amount-negative font-medium truncate' : 'truncate'} style={{ color: isOver ? undefined : 'var(--color-text-secondary)' }}>
                               {formatCurrency(spent, currency)} spent
                             </span>
-                            <span style={{ color: 'var(--color-text-tertiary)' }}>
+                            <span className="truncate ml-1" style={{ color: 'var(--color-text-tertiary)' }}>
                               {isOver ? 'Over by ' + formatCurrency(spent - limit, currency) : formatCurrency(remaining, currency) + ' left'}
                             </span>
                           </div>

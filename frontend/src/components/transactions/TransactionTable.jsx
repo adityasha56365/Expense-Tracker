@@ -47,7 +47,7 @@ export default function TransactionTable({ transactions, loading }) {
   return (
     <>
       {/* Desktop table */}
-      <div className="hidden md:block overflow-x-auto">
+      <div className="hidden md:block overflow-x-auto w-full">
         <table className="data-table">
           <thead>
             <tr>
@@ -116,7 +116,7 @@ export default function TransactionTable({ transactions, loading }) {
                   </span>
                 </td>
                 <td className="text-right">
-                  <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center justify-end gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
                     <button
                       className="btn btn-ghost btn-sm !p-1.5 rounded-lg"
                       onClick={() => setEditTarget(tx)}
@@ -142,7 +142,7 @@ export default function TransactionTable({ transactions, loading }) {
       {/* Mobile list */}
       <div className="md:hidden divide-y" style={{ borderColor: 'var(--color-border-subtle)' }}>
         {transactions.map((tx) => (
-          <div key={tx._id} className="flex items-center gap-3 py-3 px-1">
+          <div key={tx._id} className="flex items-center gap-3 py-3 px-2">
             <div className={clsx(
               'w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0'
             )}
@@ -155,14 +155,14 @@ export default function TransactionTable({ transactions, loading }) {
               <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
                 {tx.title}
               </p>
-              <div className="flex items-center gap-2 mt-0.5">
+              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                 <CategoryBadge category={tx.category} size="xs" />
                 <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
                   {getRelativeTime(tx.date)}
                 </span>
               </div>
             </div>
-            <div className="flex flex-col items-end gap-1">
+            <div className="flex flex-col items-end gap-1 flex-shrink-0">
               <span className={clsx(
                 'tabular-nums font-semibold text-sm',
                 tx.type === 'income' ? 'amount-positive' : 'amount-negative'
@@ -170,11 +170,11 @@ export default function TransactionTable({ transactions, loading }) {
                 {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount, currency)}
               </span>
               <div className="flex gap-1">
-                <button className="btn btn-ghost btn-sm !p-1 rounded-md" onClick={() => setEditTarget(tx)}>
-                  <Edit2 size={12} />
+                <button className="btn btn-ghost btn-sm !p-1 rounded-md" onClick={() => setEditTarget(tx)} aria-label="Edit">
+                  <Edit2 size={13} />
                 </button>
-                <button className="btn btn-ghost btn-sm !p-1 rounded-md" onClick={() => setDeleteTarget(tx)}>
-                  <Trash2 size={12} />
+                <button className="btn btn-ghost btn-sm !p-1 rounded-md text-red-500" onClick={() => setDeleteTarget(tx)} aria-label="Delete">
+                  <Trash2 size={13} />
                 </button>
               </div>
             </div>
