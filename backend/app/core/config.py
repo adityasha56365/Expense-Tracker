@@ -4,12 +4,10 @@ from pydantic_settings import BaseSettings
 from pydantic import Field
 from functools import lru_cache
 
-DEFAULT_MONGO_URL = "mongodb+srv://aditya:Aditya2006@cluster0.ipza7kg.mongodb.net/expense_tracker?retryWrites=true&w=majority&appName=Cluster0&tlsAllowInvalidCertificates=true"
-
 
 class Settings(BaseSettings):
     MONGODB_URL: str = Field(
-        default_factory=lambda: os.getenv("MONGODB_URI") or os.getenv("MONGODB_URL") or DEFAULT_MONGO_URL
+        default_factory=lambda: os.getenv("MONGODB_URI") or os.getenv("MONGODB_URL") or "mongodb://localhost:27017/expense_tracker"
     )
     DATABASE_NAME: str = "expense_tracker"
     SECRET_KEY: str = Field(
